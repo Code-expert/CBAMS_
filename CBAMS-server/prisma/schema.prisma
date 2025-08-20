@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  FARMER
+  EXPERT
+  ADMIN
+  SELLER
+}
+
+enum OrderStatus {
+  PENDING // Order placed by user, waiting for admin confirmation
+  ACCEPTED // Admin has approved the order
+  CANCELLED // Cancelled by user or admin (only possible if still PENDING)
+  SHIPPED // Order is shipped
+  DELIVERED // Order delivered to customer
+}
+
+enum RepeatType {
+  NONE
+  DAILY
+  WEEKLY
+}
+
+enum SessionStatus {
+  PENDING     // Farmer requested
+  CONFIRMED   // Expert accepted
+  CANCELLED   // Farmer/Expert cancelled  
+  COMPLETED   // Session done
+}
+
+model User {
+  id        Int        @id @default(autoincrement())
+  name      String
+  email     String     @unique
+  password  String
+  role      Role       @default(FARMER)
+  profile   Profile?
+  shops     Shop[] // A seller can have multiple shops
+  orders    Order[] // Farmers can place orders
+  schedules Schedule[]
+  farmerSessions Session[] @relation("FarmerSessions")
+  expertSessions Session[] @relation("ExpertSessions")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Profile {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int      @unique
+  phone     String?
+  address   String?
+  latitude  Float?
+  longitude Float?
+  bio       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Shop {
+  id          Int          @id @default(autoincrement())
+  name        String
+  description String?
+  owner       User         @relation(fields: [ownerId], references: [id])
+  ownerId     Int
+  fertilizers Fertilizer[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Fertilizer {
+  id            Int       @id @default(autoincrement())
+  name          String
+  mrp           Float?                 // make optional
+  sellingPrice  Float?                 // make optional
+  stock         Int
+  features      String?
+  description   String?
+  subImages     String[] @db.Text
+  shop          Shop      @relation(fields: [shopId], references: [id])
+  shopId        Int
+  orders        Order[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+
+
+model Order {
+  id           Int         @id @default(autoincrement())
+  quantity     Int
+  totalPrice   Float
+  fertilizer   Fertilizer  @relation(fields: [fertilizerId], references: [id], onDelete: Cascade)
+  fertilizerId Int
+  buyer        User        @relation(fields: [buyerId], references: [id])
+  buyerId      Int
+  status       OrderStatus @default(PENDING)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+
+model Schedule {
+  id          Int        @id @default(autoincrement())
+  title       String
+  description String?
+  date        DateTime
+  repeat      RepeatType @default(NONE)
+  user        User       @relation(fields: [userId], references: [id])
+  userId      Int
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+
+model Session {
+  id         Int           @id @default(autoincrement())
+  farmer     User          @relation("FarmerSessions", fields: [farmerId], references: [id])
+  farmerId   Int
+  expert     User          @relation("ExpertSessions", fields: [expertId], references: [id])
+  expertId   Int
+  date       DateTime
+  status     SessionStatus @default(PENDING)
+  videoLink  String?       // generated when confirmed
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+}
