@@ -37,7 +37,7 @@ const Navbar = () => {
       case 'FARMER':
         return [
           ...baseItems,
-          { href: "/marketplace", label: t("Marketplace") || "Marketplace", key: "marketplace" },
+         // { href: "/marketplace", label: t("Marketplace") || "Marketplace", key: "marketplace" },
           { href: "/orders", label: t("Orders") || "Orders", key: "orders" },
           { href: "/schedules", label: t("Schedules") || "Schedules", key: "schedules" },
           { href: "/session", label: t("Sessions") || "Sessions", key: "sessions" }
@@ -111,7 +111,7 @@ const Navbar = () => {
               <Leaf className="w-6 h-6 text-yellow-300" />
             </div>
             <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-white to-yellow-200 bg-clip-text text-transparent">
-              Agri Assist
+              Kisan Utkarsh
             </h1>
           </motion.div>
 

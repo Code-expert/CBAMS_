@@ -39,7 +39,7 @@ const AnalyticsTab = ({ currentLanguage }) => {
       </div>
 
       {/* Performance Metrics */}
-      <div className="bg-white rounded-xl p-6 shadow-lg border border-green-100">
+      {/* <div className="bg-white rounded-xl p-6 shadow-lg border border-green-100">
         <h3 className="text-xl font-bold text-gray-800 mb-6">Performance Metrics</h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {[
@@ -61,7 +61,7 @@ const AnalyticsTab = ({ currentLanguage }) => {
             );
           })}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

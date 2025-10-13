@@ -8,7 +8,8 @@ import {
   Cloud, 
   ShoppingCart,
   Bot,
-  Users
+  Users,
+  Tv
 } from 'lucide-react';
 import { translations } from '../../constants/languages';
 
@@ -21,6 +22,7 @@ const Sidebar = ({ sidebarOpen, activeTab, setActiveTab, currentLanguage }) => {
     { id: 'tasks', icon: Calendar, label: t('tasks') },
     { id: 'marketplace', icon: ShoppingCart, label: t('marketplace') },
     { id: 'chatbot', icon: Bot, label: currentLanguage === 'hi' ? 'AI सहायक' : currentLanguage === 'pa' ? 'AI ਸਹਾਇਕ' : 'AI Assistant' },
+    { id: 'session', icon: Tv, label: t('session') },
     { id: 'weather', icon: Cloud, label: t('weather') },
     { id: 'community', icon: Users, label: t('community') },
     { id: 'settings', icon: Settings, label: t('settings') }

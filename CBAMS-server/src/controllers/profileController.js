@@ -39,25 +39,22 @@ export const getMyProfile = async (req, res) => {
  */
 export const updateMyProfile = async (req, res) => {
   try {
-    const { phone, address, bio } = req.body;
+    const { name, phone,role, address, bio } = req.body;
 
     let latitude = null;
     let longitude = null;
 
-    // If address provided, fetch lat/lon from LocationIQ
+    // 🧭 Fetch latitude & longitude using LocationIQ if address is provided
     if (address) {
       try {
-        const geoRes = await axios.get(
-          "https://us1.locationiq.com/v1/search.php",
-          {
-            params: {
-              key: process.env.LOCATIONIQ_API_KEY,
-              q: address,
-              format: "json",
-              limit: 1,
-            },
-          }
-        );
+        const geoRes = await axios.get("https://us1.locationiq.com/v1/search.php", {
+          params: {
+            key: process.env.LOCATIONIQ_API_KEY,
+            q: address,
+            format: "json",
+            limit: 1,
+          },
+        });
 
         if (geoRes.data.length > 0) {
           latitude = parseFloat(geoRes.data[0].lat);
@@ -68,7 +65,22 @@ export const updateMyProfile = async (req, res) => {
       }
     }
 
-    // Ensure profile exists (or create if not)
+    // 🧑‍💻 Update user's name if provided
+    if (name) {
+      await prisma.user.update({
+        where: { id: req.user.id },
+        data: { name },
+      });
+    }
+
+    if(role){
+      await prisma.user.update({
+        where: { id: req.user.id },
+        data: { role },
+      });
+    }
+
+    // 🧱 Check if profile exists or create one
     let profile = await prisma.profile.findUnique({
       where: { userId: req.user.id },
     });
@@ -91,9 +103,18 @@ export const updateMyProfile = async (req, res) => {
       });
     }
 
-    res.json({ message: "Profile updated successfully", profile });
+    // 🔁 Fetch updated combined user with profile
+    const updatedUser = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      include: { profile: true },
+    });
+
+    res.json({
+      message: "Profile updated successfully",
+      user: updatedUser,
+    });
   } catch (error) {
-    console.error(error);
+    console.error("Error updating profile:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

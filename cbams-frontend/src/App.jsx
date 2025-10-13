@@ -10,7 +10,7 @@ function App() {
 
   return (
     <div className="App">
-      {showNavbar && <Navbar />}
+      
       <main>
         <Outlet />
       </main>

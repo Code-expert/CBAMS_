@@ -15,11 +15,11 @@ enum Role {
 }
 
 enum OrderStatus {
-  PENDING // Order placed by user, waiting for admin confirmation
-  ACCEPTED // Admin has approved the order
-  CANCELLED // Cancelled by user or admin (only possible if still PENDING)
-  SHIPPED // Order is shipped
-  DELIVERED // Order delivered to customer
+  PENDING 
+  ACCEPTED 
+  CANCELLED 
+  SHIPPED 
+  DELIVERED 
 }
 
 enum RepeatType {
@@ -29,10 +29,10 @@ enum RepeatType {
 }
 
 enum SessionStatus {
-  PENDING     // Farmer requested
-  CONFIRMED   // Expert accepted
-  CANCELLED   // Farmer/Expert cancelled  
-  COMPLETED   // Session done
+  PENDING     
+  CONFIRMED   
+  CANCELLED   
+  COMPLETED   
 }
 
 model User {
@@ -41,9 +41,15 @@ model User {
   email     String     @unique
   password  String
   role      Role       @default(FARMER)
+  isVerified      Boolean    @default(false)
+  otp             String? 
+  otpExpiry       DateTime?
+  resetToken      String?
+  resetTokenExpiry DateTime?
+  
   profile   Profile?
-  shops     Shop[] // A seller can have multiple shops
-  orders    Order[] // Farmers can place orders
+  shops     Shop[] 
+  orders    Order[] 
   schedules Schedule[]
   farmerSessions Session[] @relation("FarmerSessions")
   expertSessions Session[] @relation("ExpertSessions")
@@ -78,8 +84,8 @@ model Shop {
 model Fertilizer {
   id            Int       @id @default(autoincrement())
   name          String
-  mrp           Float?                 // make optional
-  sellingPrice  Float?                 // make optional
+  mrp           Float?                 
+  sellingPrice  Float?                 
   stock         Int
   features      String?
   description   String?
@@ -127,8 +133,8 @@ model Session {
   expert     User          @relation("ExpertSessions", fields: [expertId], references: [id])
   expertId   Int
   date       DateTime
-  status     SessionStatus @default(PENDING)
-  videoLink  String?       // generated when confirmed
+  status     SessionStatus @default(PENDING)     
+  videoRoomId String?      
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
 }

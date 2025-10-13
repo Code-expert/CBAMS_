@@ -34,7 +34,7 @@ export const translations = {
     soilAnalysis: 'Soil Analysis',
     aiAssistant: 'AI Assistant',
     scheduleTask: 'Schedule Task',
-    expertCall: 'Expert Call',
+    session: 'Expert Consultaion',
     viewAnalytics: 'View Analytics',
     addNewTask: 'Add New Task',
     pendingTasks: 'Pending Tasks',

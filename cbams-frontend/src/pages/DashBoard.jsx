@@ -10,6 +10,7 @@ import TasksTab from './TasksTab';
 import MarketplaceTab from './MarketplaceTab';
 import ChatbotTab from './ChatBot';
 import WeatherForecast from '../componenets/Dashboard/WeatherForecast';
+import ExpertConsultationPage from './Session';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -35,6 +36,8 @@ const Dashboard = () => {
         return <MarketplaceTab currentLanguage={currentLanguage} />;
       case 'chatbot':
         return <ChatbotTab currentLanguage={currentLanguage} />;
+      case 'session':
+        return <ExpertConsultationPage currentLanguage={currentLanguage} />;  
       case 'weather':
         return (
           <div className="space-y-6">
@@ -73,12 +76,12 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
-{/* <Header 
+<Header 
         sidebarOpen={sidebarOpen} 
         setSidebarOpen={setSidebarOpen}
         currentLanguage={currentLanguage}
         setCurrentLanguage={setCurrentLanguage}
-      /> */}
+      />
 
       <div className="flex">
         <Sidebar 

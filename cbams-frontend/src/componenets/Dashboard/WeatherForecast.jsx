@@ -15,7 +15,7 @@ const WeatherForecast = ({ currentLanguage }) => {
     { day: 'Tomorrow', icon: CloudRain, temp: '25°C', humidity: '78%' },
     { day: 'Day 3', icon: Cloud, temp: '26°C', humidity: '70%' }
   ];
-
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

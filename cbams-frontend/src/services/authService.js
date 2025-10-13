@@ -10,7 +10,7 @@ const authService = {
     const response = await api.post('/auth/login', credentials);
     return response.data;
   },
-
+  
   logout: () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
