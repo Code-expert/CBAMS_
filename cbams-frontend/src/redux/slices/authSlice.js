@@ -29,19 +29,17 @@ export const loginUser = createAsyncThunk(
     try {
       const data = await authService.login(credentials);
       
-      if (data.token) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-      }
+      // Store user info
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
       
       return data;
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || 'Login failed'
-      );
+      return rejectWithValue(error.response?.data?.message || 'Login failed');
     }
   }
 );
+
 
 // Get stored user
 const user = localStorage.getItem('user') 

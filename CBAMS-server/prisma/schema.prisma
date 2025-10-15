@@ -35,6 +35,18 @@ enum SessionStatus {
   COMPLETED   
 }
 
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
 model User {
   id        Int        @id @default(autoincrement())
   name      String
@@ -51,8 +63,11 @@ model User {
   shops     Shop[] 
   orders    Order[] 
   schedules Schedule[]
+  tasks     Task[]              
   farmerSessions Session[] @relation("FarmerSessions")
   expertSessions Session[] @relation("ExpertSessions")
+  marketListings MarketplaceListing[] @relation("FarmerListings")
+  marketOrders   MarketOrder[]        @relation("BuyerMarketOrders")
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 }
@@ -97,8 +112,6 @@ model Fertilizer {
   updatedAt     DateTime  @updatedAt
 }
 
-
-
 model Order {
   id           Int         @id @default(autoincrement())
   quantity     Int
@@ -112,7 +125,6 @@ model Order {
   updatedAt    DateTime    @updatedAt
 }
 
-
 model Schedule {
   id          Int        @id @default(autoincrement())
   title       String
@@ -124,7 +136,6 @@ model Schedule {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 }
-
 
 model Session {
   id         Int           @id @default(autoincrement())
@@ -138,3 +149,94 @@ model Session {
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
 }
+
+model Task {
+  id          Int        @id @default(autoincrement())
+  title       String
+  description String?
+  time        String     // Format: "HH:MM" (e.g., "08:00", "14:30")
+  dueDate     DateTime   @default(now())
+  priority    Priority   @default(MEDIUM)
+  status      TaskStatus @default(PENDING)
+  icon        String     @default("Sprout")
+  
+  // SMS Reminder fields
+  reminderEnabled Boolean  @default(true)
+  reminderSent    Boolean  @default(false)
+  
+  // Relations
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      Int
+  
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([userId, status])
+  @@index([dueDate])
+}
+model MarketplaceListing {
+  id          String   @id @default(uuid())
+  farmerId    Int
+  farmer      User     @relation("FarmerListings", fields: [farmerId], references: [id], onDelete: Cascade)
+  
+  productName String
+  category    String   // Grain, Vegetable, Fruit, Pulses, Spices, Seeds
+  quantity    Float
+  unit        String   // kg, quintal, ton, piece, bunch
+  pricePerUnit Float
+  totalPrice  Float
+  
+  description String?
+  imageUrl    String?
+  location    String
+  
+  status      ListingStatus @default(ACTIVE)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  marketOrders MarketOrder[]
+  
+  @@map("marketplace_listings")
+  @@index([farmerId, status])
+  @@index([category, status])
+}
+
+model MarketOrder {
+  id          String   @id @default(uuid())
+  listingId   String
+  listing     MarketplaceListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  
+  buyerId     Int
+  buyer       User     @relation("BuyerMarketOrders", fields: [buyerId], references: [id], onDelete: Cascade)
+  
+  quantity    Float
+  totalPrice  Float
+  
+  status      MarketOrderStatus @default(PENDING)
+  
+  deliveryAddress String?
+  notes       String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("market_orders")
+  @@index([buyerId, status])
+  @@index([listingId])
+}
+
+enum ListingStatus {
+  ACTIVE
+  SOLD
+  EXPIRED
+  CANCELLED
+}
+
+enum MarketOrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+

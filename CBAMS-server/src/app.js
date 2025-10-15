@@ -12,13 +12,16 @@ import adminOrderRoutes from "./routes/adminOrders.js";
 import scheduleRoutes from "./routes/schedule.js";
 import sessionRoutes from "./routes/session.js";
 import { initSchedules } from "./services/scheduleCron.js";
+import taskRoutes from "./routes/tasks.js";
+import { initTaskReminders } from "./services/taskCron.js";
+import analyticsRoutes from './routes/analytics.js';
 
 dotenv.config();
 const app = express();
 
 
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000'], // Your frontend URLs
+  origin: ['http://localhost:5173', 'http://localhost:5000'], // Your frontend URLs
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -27,6 +30,7 @@ app.use(cors({
 app.use(express.json());
 
 initSchedules();
+initTaskReminders();
 
 app.get("/", (req, res) => {
   res.send("Welcome to the Agri Backend API");
@@ -41,6 +45,7 @@ app.use("/orders", orderRoutes);
 app.use("/admin/orders", adminOrderRoutes);
 app.use("/schedules", scheduleRoutes);
 app.use("/session", sessionRoutes);
-
+app.use('/tasks', taskRoutes); 
+app.use('/analytics', analyticsRoutes);
 
 export default app;

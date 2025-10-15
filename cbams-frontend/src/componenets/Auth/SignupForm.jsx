@@ -51,23 +51,30 @@ const SignupForm = () => {
   const roleOptions = [
     { value: '', label: 'Select your role' },
     { value: 'FARMER', label: 'Farmer' },
-    { value: 'SELLER', label: 'Seller' },
+    { value: 'EXPERT', label: 'Expert' },
   ];
 
   // Handle Redux state changes
   useEffect(() => {
-    if (isError) {
-      console.error('Registration error:', message);
-    }
+  if (isError) {
+    console.error('Registration error:', message);
+  }
 
-    if (isSuccess && user) {
+  if (isSuccess && user) {
+    // ✅ Role-based redirect after signup
+    if (user.role === 'EXPERT') {
+      navigate('/expert/dashboard');
+    } else if (user.role === 'ADMIN') {
+      navigate('/admin/dashboard');
+    } else {
       navigate('/dashboard');
     }
+  }
 
-    return () => {
-      dispatch(reset());
-    };
-  }, [user, isError, isSuccess, message, navigate, dispatch]);
+  return () => {
+    dispatch(reset());
+  };
+}, [user, isError, isSuccess, message, navigate, dispatch]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -96,7 +103,7 @@ const SignupForm = () => {
       newErrors.role = 'Role selection is required';
     }
 
-    if (formData.role === 'farmer' && !formData.farmSize) {
+    if (formData.role === 'FARMER' && !formData.farmSize) {
       newErrors.farmSize = 'Farm size is required for farmers';
     }
 
@@ -279,7 +286,7 @@ const SignupForm = () => {
       </div>
 
       {/* Farm Size - Only show for farmers */}
-      {formData.role === 'farmer' && (
+      {formData.role === 'FARMER' && (
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}

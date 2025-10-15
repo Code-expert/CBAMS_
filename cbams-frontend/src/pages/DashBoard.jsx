@@ -11,6 +11,7 @@ import MarketplaceTab from './MarketplaceTab';
 import ChatbotTab from './ChatBot';
 import WeatherForecast from '../componenets/Dashboard/WeatherForecast';
 import ExpertConsultationPage from './Session';
+import Community from '../componenets/Dashboard/Community';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -49,9 +50,7 @@ const Dashboard = () => {
         return (
           <div className="space-y-6">
             <h2 className="text-3xl font-bold text-gray-800">Community Hub</h2>
-            <div className="bg-white rounded-xl p-6 shadow-lg border border-green-100">
-              <p className="text-gray-600">Community features coming soon...</p>
-            </div>
+            <Community currentLanguage={currentLanguage} />
           </div>
         );
       case 'settings':

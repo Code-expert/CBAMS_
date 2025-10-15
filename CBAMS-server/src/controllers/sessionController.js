@@ -116,21 +116,65 @@ export const getFarmerSessions = async (req, res) => {
 // 📅 Expert views all their sessions
 export const getExpertSessions = async (req, res) => {
   try {
-    if (req.user.role !== "EXPERT") {
-      return res.status(403).json({ message: "Only experts can access this" });
-    }
+    const expertId = req.user.id;
 
     const sessions = await prisma.session.findMany({
-      where: { expertId: req.user.id },
+      where: { expertId },
       include: {
-        farmer: { select: { id: true, name: true, email: true } },
+        farmer: {
+          include: {
+            profile: true
+          }
+        }
       },
-      orderBy: { date: "desc" },
+      orderBy: {
+        date: 'desc'
+      }
     });
 
-    res.json({ sessions });
-  } catch (err) {
-    console.error("Error fetching expert sessions:", err);
-    res.status(500).json({ message: "Server error", error: err.message });
+    // ✅ Return array directly, not wrapped in object
+    res.json(sessions);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+export const updateSessionStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const userId = req.user.id;
+
+    // Validate status
+    const validStatuses = ['PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: 'Invalid status' });
+    }
+
+    const session = await prisma.session.findUnique({
+      where: { id: Number(id) }
+    });
+
+    if (!session) {
+      return res.status(404).json({ message: 'Session not found' });
+    }
+
+    // Check if user is either the expert or farmer
+    if (session.expertId !== userId && session.farmerId !== userId) {
+      return res.status(403).json({ message: 'Not authorized' });
+    }
+
+    const updatedSession = await prisma.session.update({
+      where: { id: Number(id) },
+      data: { status }
+    });
+
+    res.json({
+      message: `Session ${status.toLowerCase()} successfully`,
+      session: updatedSession
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
   }
 };

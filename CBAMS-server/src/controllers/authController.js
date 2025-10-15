@@ -8,7 +8,7 @@ export const register = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
-    if (!["FARMER", "SELLER"].includes(role)) {
+    if (!["FARMER", "SELLER","EXPERT"].includes(role)) {
       return res.status(400).json({ message: "Invalid role selection" });
     }
 

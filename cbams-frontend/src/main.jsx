@@ -13,6 +13,9 @@ import ProtectedRoute from "./componenets/common/ProtectedRoute" // Add this
 import MarketplaceTab from './pages/MarketplaceTab.jsx'
 import TasksTab from './pages/TasksTab.jsx'
 import AnalyticsTab from './pages/AnalyticsTab.jsx'
+import ExpertConsultationPage from './pages/Session.jsx'
+import ExpertDashboard from './pages/ExpertDashboard.jsx'
+import VideoCall from './pages/VideoCall.jsx'
 
 const appRouter = createBrowserRouter([
   {
@@ -28,10 +31,22 @@ const appRouter = createBrowserRouter([
         element: <AuthPages />, // Public route - no protection needed
       },
       {
+        path: '/expert/dashboard',
+        element: (
+          <ProtectedRoute allowedRoles={['EXPERT']}>
+            <ExpertDashboard />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/video-call/:roomId',
+        element: <VideoCall/>,
+      },
+      {
         path: '/dashboard',
         element: (
           <ProtectedRoute>
-            <Dashboard/>
+            <Dashboard />
           </ProtectedRoute>
         ),
       },
@@ -40,7 +55,7 @@ const appRouter = createBrowserRouter([
         path: '/marketplace',
         element: (
           <ProtectedRoute>
-            <MarketplaceTab/>
+            <MarketplaceTab />
           </ProtectedRoute>
         ),
       },
@@ -48,7 +63,7 @@ const appRouter = createBrowserRouter([
         path: '/tasks',
         element: (
           <ProtectedRoute>
-            <TasksTab/> 
+            <TasksTab />
           </ProtectedRoute>
         ),
       },
@@ -61,10 +76,18 @@ const appRouter = createBrowserRouter([
         ),
       },
       {
-        path:'/analytics',
-        element:(
+        path: '/analytics',
+        element: (
           <ProtectedRoute>
-            <AnalyticsTab/>
+            <AnalyticsTab />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/consultations',
+        element: (
+          <ProtectedRoute>
+            <ExpertConsultationPage />
           </ProtectedRoute>
         ),
       },
@@ -77,14 +100,7 @@ const appRouter = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      {
-        path: '/seller',
-        element: (
-          <ProtectedRoute requiredRole="SELLER">
-            <div>Seller Dashboard</div> {/* Replace with your Seller component */}
-          </ProtectedRoute>
-        ),
-      },
+      
     ],
   },
 ]);

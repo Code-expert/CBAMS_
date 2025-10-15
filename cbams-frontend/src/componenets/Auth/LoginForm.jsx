@@ -24,20 +24,25 @@ const LoginForm = () => {
 
   // Handle Redux state changes
   useEffect(() => {
-    if (isError) {
-      console.error('Login error:', message);
-    }
+  if (isError) {
+    console.error('Login error:', message);
+  }
 
-    if (isSuccess && user) {
-      // Navigate based on user role
-      const dashboardPath = user.role === 'admin' ? '/admin/dashboard' : '/dashboard';
-      navigate(dashboardPath);
+  if (isSuccess && user) {
+    // ✅ Role-based redirect
+    if (user.role === 'EXPERT') {
+      navigate('/expert/dashboard');
+    } else if (user.role === 'ADMIN') {
+      navigate('/admin/dashboard');
+    } else {
+      navigate('/dashboard'); // FARMER or SELLER
     }
+  }
 
-    return () => {
-      dispatch(reset());
-    };
-  }, [user, isError, isSuccess, message, navigate, dispatch]);
+  return () => {
+    dispatch(reset());
+  };
+}, [user, isError, isSuccess, message, navigate, dispatch]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
