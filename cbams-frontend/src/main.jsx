@@ -16,6 +16,7 @@ import AnalyticsTab from './pages/AnalyticsTab.jsx'
 import ExpertConsultationPage from './pages/Session.jsx'
 import ExpertDashboard from './pages/ExpertDashboard.jsx'
 import VideoCall from './pages/VideoCall.jsx'
+import Settings from './pages/Setting.jsx'
 
 const appRouter = createBrowserRouter([
   {
@@ -88,6 +89,14 @@ const appRouter = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <ExpertConsultationPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/profile',
+        element: (
+          <ProtectedRoute>
+            <Settings />
           </ProtectedRoute>
         ),
       },

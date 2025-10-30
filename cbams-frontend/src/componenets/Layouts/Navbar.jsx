@@ -86,7 +86,7 @@ const Navbar = () => {
 
   const profileMenuItems = [
     { icon: User, label: t("profile") || "Profile", href: "/profile" },
-    { icon: Settings, label: t("settings") || "Settings", href: "/settings" },
+    { icon: Settings, label: t("settings") || "Settings", href: "/profile" },
     { icon: Bell, label: t("notifications") || "Notifications", href: "/notifications" },
     { icon: MessageCircle, label: t("messages") || "Messages", href: "/messages" },
     { icon: LogOut, label: t("logout") || "Logout", href: "/logout", isAction: true }

@@ -6,6 +6,7 @@ import FarmStatistics from './FarmStatistics';
 import TasksPanel from './TasksPanel';
 import WeatherForecast from './WeatherForecast';
 import RecentActivity from './RecentActivity';
+import CropRecommendation from './CropRecommendation';
 
 
 const OverviewTab = ({ currentLanguage, selectedTask, setSelectedTask }) => {
@@ -26,7 +27,7 @@ const OverviewTab = ({ currentLanguage, selectedTask, setSelectedTask }) => {
         />
         <div className="space-y-6">
           <WeatherForecast currentLanguage={currentLanguage} />
-          <RecentActivity currentLanguage={currentLanguage} />
+          <CropRecommendation currentLanguage={currentLanguage} />
         </div>
       </div>
     </div>

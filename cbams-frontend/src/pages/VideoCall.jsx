@@ -6,7 +6,7 @@ const VideoCall = () => {
 
   useEffect(() => {
     // Initialize WebRTC here
-    console.log('Room ID:', roomId);
+    // console.log('Room ID:', roomId);
   }, [roomId]);
 
   return (
