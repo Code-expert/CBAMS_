@@ -9,8 +9,9 @@ export default defineConfig({
     tailwindcss(),
     react()],
   preview: {
-    allowedHosts: ['https://cbams-1.onrender.com/'],
+    allowedHosts: ['cbams-1.onrender.com', 'localhost'],
     host: '0.0.0.0',
-    port: process.env.PORT || 10000
+    port: process.env.PORT || 10000,
   }
+
 })
