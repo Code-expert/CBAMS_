@@ -13,7 +13,7 @@ import scheduleRoutes from "./routes/schedule.js";
 import sessionRoutes from "./routes/session.js";
 import { initSchedules } from "./services/scheduleCron.js";
 import taskRoutes from "./routes/tasks.js";
-import { initTaskReminders } from "./services/taskCron.js";
+// import { initTaskReminders } from "./services/taskCron.js";
 import analyticsRoutes from './routes/cropAnalyticsRoutes.js';
 import farmMetricsRoutes from './routes/farmMetrics.js';
 import cropRecommendationRoutes from './routes/cropRecommendationRoutes.js';
@@ -31,7 +31,7 @@ app.use(cors({
 app.use(express.json());
 
 initSchedules();
-initTaskReminders();
+// initTaskReminders();
 
 app.get("/", (req, res) => {
   res.send("Welcome to the Agri Backend API");

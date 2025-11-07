@@ -35,18 +35,6 @@ enum SessionStatus {
   COMPLETED   
 }
 
-enum Priority {
-  LOW
-  MEDIUM
-  HIGH
-}
-
-enum TaskStatus {
-  PENDING
-  IN_PROGRESS
-  COMPLETED
-}
-
 model User {
   id        Int        @id @default(autoincrement())
   name      String
@@ -63,15 +51,8 @@ model User {
   shops     Shop[] 
   orders    Order[] 
   schedules Schedule[]
-  tasks     Task[]              
   farmerSessions Session[] @relation("FarmerSessions")
   expertSessions Session[] @relation("ExpertSessions")
-  marketListings MarketplaceListing[] @relation("FarmerListings")
-  marketOrders   MarketOrder[]        @relation("BuyerMarketOrders")
-  cropImages          CropImage[]          @relation("UserCropImages")
-  cropRecommendations CropRecommendation[] @relation("UserCropRecommendations")
-  crops                Crop[]                @relation("FarmerCrops")
-  cropAnalysisImages   CropAnalysisImage[]   @relation("FarmerCropImages")
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 }
@@ -116,6 +97,8 @@ model Fertilizer {
   updatedAt     DateTime  @updatedAt
 }
 
+
+
 model Order {
   id           Int         @id @default(autoincrement())
   quantity     Int
@@ -129,6 +112,7 @@ model Order {
   updatedAt    DateTime    @updatedAt
 }
 
+
 model Schedule {
   id          Int        @id @default(autoincrement())
   title       String
@@ -141,6 +125,7 @@ model Schedule {
   updatedAt   DateTime   @updatedAt
 }
 
+
 model Session {
   id         Int           @id @default(autoincrement())
   farmer     User          @relation("FarmerSessions", fields: [farmerId], references: [id])
@@ -152,225 +137,4 @@ model Session {
   videoRoomId String?      
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
-}
-
-model Task {
-  id          Int        @id @default(autoincrement())
-  title       String
-  description String?
-  time        String     // Format: "HH:MM" (e.g., "08:00", "14:30")
-  dueDate     DateTime   @default(now())
-  priority    Priority   @default(MEDIUM)
-  status      TaskStatus @default(PENDING)
-  icon        String     @default("Sprout")
-  
-  // SMS Reminder fields
-  reminderEnabled Boolean  @default(true)
-  reminderSent    Boolean  @default(false)
-  
-  // Relations
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      Int
-  
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-
-  @@index([userId, status])
-  @@index([dueDate])
-}
-model MarketplaceListing {
-  id          String   @id @default(uuid())
-  farmerId    Int
-  farmer      User     @relation("FarmerListings", fields: [farmerId], references: [id], onDelete: Cascade)
-  
-  productName String
-  category    String   // Grain, Vegetable, Fruit, Pulses, Spices, Seeds
-  quantity    Float
-  unit        String   // kg, quintal, ton, piece, bunch
-  pricePerUnit Float
-  totalPrice  Float
-  
-  description String?
-  imageUrl    String?
-  location    String
-  
-  status      ListingStatus @default(ACTIVE)
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  marketOrders MarketOrder[]
-  
-  @@map("marketplace_listings")
-  @@index([farmerId, status])
-  @@index([category, status])
-}
-
-model MarketOrder {
-  id          String   @id @default(uuid())
-  listingId   String
-  listing     MarketplaceListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
-  
-  buyerId     Int
-  buyer       User     @relation("BuyerMarketOrders", fields: [buyerId], references: [id], onDelete: Cascade)
-  
-  quantity    Float
-  totalPrice  Float
-  
-  status      MarketOrderStatus @default(PENDING)
-  
-  deliveryAddress String?
-  notes       String?
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  @@map("market_orders")
-  @@index([buyerId, status])
-  @@index([listingId])
-}
-
-enum ListingStatus {
-  ACTIVE
-  SOLD
-  EXPIRED
-  CANCELLED
-}
-
-enum MarketOrderStatus {
-  PENDING
-  CONFIRMED
-  SHIPPED
-  DELIVERED
-  CANCELLED
-}
-model CropImage {
-  id            String   @id @default(uuid())
-  userId        Int      // ← Changed to Int
-  farmId        String
-  imageUrl      String
-  cropType      String
-  healthScore   Float
-  status        String
-  analysisData  Json
-  uploadDate    DateTime @default(now())
-  
-  user          User     @relation("UserCropImages", fields: [userId], references: [id])
-  
-  @@index([userId, farmId])
-}
-
-model CropRecommendation {
-  id              String   @id @default(uuid())
-  userId          Int      // ← Changed to Int
-  recommendations Json
-  inputData       Json
-  createdAt       DateTime @default(now())
-  
-  user            User     @relation("UserCropRecommendations", fields: [userId], references: [id])
-}
-
-model Crop {
-  id               String      @id @default(uuid())
-  farmerId         Int
-  farmer           User        @relation("FarmerCrops", fields: [farmerId], references: [id], onDelete: Cascade)
-  
-  name             String
-  type             String
-  plantedDate      DateTime
-  expectedHarvest  DateTime
-  location         String?
-  area             Float?      // in acres or hectares
-  status           CropStatus  @default(ACTIVE)
-  
-  // Latest Analysis Data
-  latestHealthScore       Int?
-  latestGrowthStage      String?
-  latestDiseaseDetected  Boolean   @default(false)
-  latestDiseaseName      String?
-  latestDiseaseConfidence Int?
-  latestPestActivity     String?
-  latestColorAnalysis    Json?     // {greenness, yellowingLevel, browningLevel}
-  latestGeminiInsights   Json?     // {overallAssessment, diseaseRisk, recommendations, visualObservations}
-  latestAnalyzedAt       DateTime?
-  
-  images           CropAnalysisImage[]
-  analysisHistory  CropAnalysisHistory[]
-  
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
-  
-  @@index([farmerId, status])
-  @@map("crops")
-}
-
-model CropAnalysisImage {
-  id              String   @id @default(uuid())
-  cropId          String
-  crop            Crop     @relation(fields: [cropId], references: [id], onDelete: Cascade)
-  
-  farmerId        Int
-  farmer          User     @relation("FarmerCropImages", fields: [farmerId], references: [id], onDelete: Cascade)
-  
-  imageUrl        String
-  cloudinaryId    String?
-  uploadedAt      DateTime @default(now())
-  
-  // Gemini Analysis Results
-  healthScore            Int?
-  growthStage           String?
-  diseaseDetected       Boolean  @default(false)
-  diseaseName           String?
-  diseaseConfidence     Int?
-  pestActivity          String?
-  leafCondition         String?
-  heightEstimate        String?
-  
-  colorAnalysis         Json?    // {greenness, yellowingLevel, browningLevel}
-  observations          String[] // Array of observation strings
-  recommendations       String[] // Array of recommendation strings
-  diseaseRisk           String?
-  overallAssessment     String?
-  
-  processingStatus      ProcessingStatus @default(PENDING)
-  errorMessage          String?
-  
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-  
-  @@index([cropId])
-  @@index([farmerId])
-  @@map("crop_analysis_images")
-}
-
-model CropAnalysisHistory {
-  id              String   @id @default(uuid())
-  cropId          String
-  crop            Crop     @relation(fields: [cropId], references: [id], onDelete: Cascade)
-  
-  weekNumber      String
-  analyzedAt      DateTime
-  healthScore     Int
-  leafCondition   String?
-  heightEstimate  String?
-  diseaseStatus   String
-  
-  imageId         String?  // Reference to the image that generated this analysis
-  
-  createdAt       DateTime @default(now())
-  
-  @@index([cropId, analyzedAt])
-  @@map("crop_analysis_history")
-}
-
-enum CropStatus {
-  ACTIVE
-  HARVESTED
-  FAILED
-}
-
-enum ProcessingStatus {
-  PENDING
-  PROCESSING
-  COMPLETED
-  FAILED
 }
