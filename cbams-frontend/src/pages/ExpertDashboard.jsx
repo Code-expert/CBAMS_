@@ -13,14 +13,15 @@ import {
   TrendingUp,
   Users,
   DollarSign,
-  Loader2
+  Loader2,
+  Copy
 } from 'lucide-react';
 import sessionService from '../services/sessionService';
 
 const ExpertDashboard = () => {
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
-  
+
   const [sessions, setSessions] = useState([]);
   const [stats, setStats] = useState({
     total: 0,
@@ -37,50 +38,50 @@ const ExpertDashboard = () => {
       navigate('/dashboard');
       return;
     }
-    
+
     fetchSessions();
   }, [user, navigate]);
 
-const fetchSessions = async () => {
-  try {
-    setLoading(true);
-    const response = await sessionService.getExpertSessions();
-    
-    // Handle different response formats
-    let sessionsData = [];
-    
-    if (Array.isArray(response)) {
-      sessionsData = response;
-    } else if (response && Array.isArray(response.sessions)) {
-      sessionsData = response.sessions;
-    } else if (response && Array.isArray(response.data)) {
-      sessionsData = response.data;
-    } else {
-      console.warn('Unexpected response format:', response);
-      sessionsData = [];
+  const fetchSessions = async () => {
+    try {
+      setLoading(true);
+      const response = await sessionService.getExpertSessions();
+
+      // Handle different response formats
+      let sessionsData = [];
+
+      if (Array.isArray(response)) {
+        sessionsData = response;
+      } else if (response && Array.isArray(response.sessions)) {
+        sessionsData = response.sessions;
+      } else if (response && Array.isArray(response.data)) {
+        sessionsData = response.data;
+      } else {
+        console.warn('Unexpected response format:', response);
+        sessionsData = [];
+      }
+
+      console.log('✅ Fetched sessions:', sessionsData);
+
+      setSessions(sessionsData);
+
+      // Calculate stats
+      const newStats = {
+        total: sessionsData.length,
+        pending: sessionsData.filter(s => s.status === 'PENDING').length,
+        confirmed: sessionsData.filter(s => s.status === 'CONFIRMED').length,
+        completed: sessionsData.filter(s => s.status === 'COMPLETED').length
+      };
+
+      setStats(newStats);
+    } catch (error) {
+      console.error('❌ Error fetching sessions:', error);
+      setSessions([]); // Always fallback to empty array
+      setStats({ total: 0, pending: 0, confirmed: 0, completed: 0 });
+    } finally {
+      setLoading(false);
     }
-    
-    console.log('✅ Fetched sessions:', sessionsData);
-    
-    setSessions(sessionsData);
-    
-    // Calculate stats
-    const newStats = {
-      total: sessionsData.length,
-      pending: sessionsData.filter(s => s.status === 'PENDING').length,
-      confirmed: sessionsData.filter(s => s.status === 'CONFIRMED').length,
-      completed: sessionsData.filter(s => s.status === 'COMPLETED').length
-    };
-    
-    setStats(newStats);
-  } catch (error) {
-    console.error('❌ Error fetching sessions:', error);
-    setSessions([]); // Always fallback to empty array
-    setStats({ total: 0, pending: 0, confirmed: 0, completed: 0 });
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
 
   const handleConfirm = async (sessionId) => {
@@ -96,7 +97,7 @@ const fetchSessions = async () => {
 
   const handleDecline = async (sessionId) => {
     if (!window.confirm('Are you sure you want to decline this session?')) return;
-    
+
     try {
       await sessionService.updateSessionStatus(sessionId, 'CANCELLED');
       fetchSessions();
@@ -193,11 +194,10 @@ const fetchSessions = async () => {
             <button
               key={tab}
               onClick={() => setFilter(tab)}
-              className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all ${
-                filter === tab
+              className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all ${filter === tab
                   ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md'
                   : 'text-gray-600 hover:bg-gray-100'
-              }`}
+                }`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
@@ -244,10 +244,35 @@ const fetchSessions = async () => {
                   </span>
                 </div>
 
+                {/* ADD CONSULTATION CODE HERE */}
+                <div className="mb-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border-2 border-green-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600 font-medium mb-1">Consultation Code</p>
+                      <p className="text-2xl font-bold text-green-700 tracking-wider font-mono">
+                        {session.id.substring(0, 8).toUpperCase()}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(session.id.substring(0, 8).toUpperCase());
+                        alert('Code copied to clipboard!');
+                      }}
+                      className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all flex items-center gap-2"
+                    >
+                      <Copy className="w-4 h-4" />
+                      Copy Code
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Verify this code matches the farmer's code
+                  </p>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center gap-2 text-gray-700">
                     <Calendar className="w-5 h-5 text-green-500" />
-                    <span className="font-medium">{new Date(session.date).toLocaleDateString('en-IN', { 
+                    <span className="font-medium">{new Date(session.date).toLocaleDateString('en-IN', {
                       day: 'numeric',
                       month: 'long',
                       year: 'numeric'
