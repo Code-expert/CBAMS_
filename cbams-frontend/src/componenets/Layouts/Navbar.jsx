@@ -32,7 +32,7 @@ const Navbar = () => {
     const baseItems = [
       // ✅ CHANGED: Dynamic dashboard based on role
       { 
-        href: user.role === 'EXPERT' ? "/expert-dashboard" : "/dashboard", 
+        href: user.role === 'EXPERT' ? "/expert/dashboard" : "/dashboard", 
         label: t("Dashboard") || "Dashboard", 
         key: "dashboard" 
       }
