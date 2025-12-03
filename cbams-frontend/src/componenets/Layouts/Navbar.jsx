@@ -30,17 +30,29 @@ const Navbar = () => {
 
     // Logged-in navigation - role based
     const baseItems = [
-      { href: "/dashboard", label: t("Dashboard") || "Dashboard", key: "dashboard" }
+      // ✅ CHANGED: Dynamic dashboard based on role
+      { 
+        href: user.role === 'EXPERT' ? "/expert-dashboard" : "/dashboard", 
+        label: t("Dashboard") || "Dashboard", 
+        key: "dashboard" 
+      }
     ];
 
     switch (user.role) {
       case 'FARMER':
         return [
           ...baseItems,
-         // { href: "/marketplace", label: t("Marketplace") || "Marketplace", key: "marketplace" },
           { href: "/orders", label: t("Orders") || "Orders", key: "orders" },
           { href: "/schedules", label: t("Schedules") || "Schedules", key: "schedules" },
           { href: "/session", label: t("Sessions") || "Sessions", key: "sessions" }
+        ];
+
+      case 'EXPERT':
+        // ✅ ADDED: Expert-specific navigation
+        return [
+          ...baseItems,
+          { href: "/session", label: t("Consultations") || "Consultations", key: "consultations" },
+          { href: "/expert/profile/edit", label: t("Edit Profile") || "Edit Profile", key: "profile" }
         ];
 
       case 'SELLER':
@@ -84,13 +96,41 @@ const Navbar = () => {
     setIsProfileDropdownOpen(false);
   };
 
-  const profileMenuItems = [
-    { icon: User, label: t("profile") || "Profile", href: "/profile" },
-    { icon: Settings, label: t("settings") || "Settings", href: "/profile" },
-    { icon: Bell, label: t("notifications") || "Notifications", href: "/notifications" },
-    { icon: MessageCircle, label: t("messages") || "Messages", href: "/messages" },
-    { icon: LogOut, label: t("logout") || "Logout", href: "/logout", isAction: true }
-  ];
+  // ✅ CHANGED: Dynamic profile menu items based on role
+  const getProfileMenuItems = () => {
+    const baseItems = [
+      { icon: User, label: t("profile") || "Profile", href: "/profile" },
+      { icon: Settings, label: t("settings") || "Settings", href: "/profile" },
+      { icon: Bell, label: t("notifications") || "Notifications", href: "/notifications" },
+      { icon: MessageCircle, label: t("messages") || "Messages", href: "/messages" },
+    ];
+
+    // Add expert-specific menu item
+    if (user?.role === 'EXPERT') {
+      baseItems.splice(1, 0, {
+        icon: Settings,
+        label: t("Edit Expert Profile") || "Edit Expert Profile",
+        href: "/expert/profile/edit"
+      });
+    }
+
+    // Add logout at the end
+    baseItems.push({
+      icon: LogOut,
+      label: t("logout") || "Logout",
+      href: "/logout",
+      isAction: true
+    });
+
+    return baseItems;
+  };
+
+  const profileMenuItems = getProfileMenuItems();
+
+  // ✅ ADDED: Helper function to get dashboard route
+  const getDashboardRoute = () => {
+    return user?.role === 'EXPERT' ? '/expert-dashboard' : '/dashboard';
+  };
 
   return (
     <motion.nav
@@ -99,12 +139,12 @@ const Navbar = () => {
       transition={{ duration: 0.6, ease: "easeOut" }}
       className="sticky top-0 z-50 bg-gradient-to-r from-green-600 via-green-700 to-emerald-600 text-white shadow-xl backdrop-blur-sm border-b border-green-500/20"
     >
-      <div  className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
+          {/* Logo - ✅ CHANGED: Dynamic navigation on click */}
           <motion.div
             whileHover={{ scale: 1.05 }}
-            onClick={() => navigate("/")}
+            onClick={() => navigate(user ? getDashboardRoute() : "/")}
             className="flex items-center gap-3 cursor-pointer"
           >
             <div className="p-2 bg-white/10 rounded-xl backdrop-blur-sm">
@@ -130,12 +170,10 @@ const Navbar = () => {
                 <span className="absolute inset-x-0 bottom-0 h-0.5 bg-yellow-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
               </motion.button>
             ))}
-
           </div>
 
           {/* Right Side Controls */}
           <div className="flex items-center gap-3">
-
             {user ? (
               // LOGGED-IN USER CONTROLS
               <>
@@ -198,8 +236,9 @@ const Navbar = () => {
                             <button
                               key={index}
                               onClick={() => handleProfileAction(item)}
-                              className={`w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors duration-200 ${item.isAction ? 'border-t border-gray-100 text-red-600 hover:bg-red-50' : ''
-                                }`}
+                              className={`w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors duration-200 ${
+                                item.isAction ? 'border-t border-gray-100 text-red-600 hover:bg-red-50' : ''
+                              }`}
                             >
                               <Icon className={`w-4 h-4 ${item.isAction ? 'text-red-500' : 'text-gray-500'}`} />
                               <span className="font-medium">{item.label}</span>
@@ -215,15 +254,14 @@ const Navbar = () => {
               // LOGGED-OUT USER CONTROLS
               <>
                 {/* Login Button */}
-            
-                  <motion.button
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => navigate('/login')}
-                    className="cursor-pointer hidden sm:block px-4 py-2 text-sm font-medium bg-white/10 hover:bg-white/20 rounded-xl backdrop-blur-sm transition-all duration-300 border border-white/20"
-                  >
-                    {t("login") || "Login"}
-                  </motion.button>
-                
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => navigate('/login')}
+                  className="cursor-pointer hidden sm:block px-4 py-2 text-sm font-medium bg-white/10 hover:bg-white/20 rounded-xl backdrop-blur-sm transition-all duration-300 border border-white/20"
+                >
+                  {t("login") || "Login"}
+                </motion.button>
+
                 {/* Signup Button */}
                 <div onClick={() => navigate('/login')} className="hidden sm:block ml-2">
                   <motion.button
@@ -263,8 +301,9 @@ const Navbar = () => {
                         i18n.changeLanguage(lang.code);
                         setIsLanguageDropdownOpen(false);
                       }}
-                      className={`w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-green-50 transition-colors duration-200 ${i18n.language === lang.code ? 'bg-green-100 text-green-800' : ''
-                        }`}
+                      className={`w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-green-50 transition-colors duration-200 ${
+                        i18n.language === lang.code ? 'bg-green-100 text-green-800' : ''
+                      }`}
                     >
                       <span className="text-lg">{lang.flag}</span>
                       <span className="font-medium">{lang.label}</span>
@@ -280,11 +319,7 @@ const Navbar = () => {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="lg:hidden p-2 bg-white/10 hover:bg-white/20 rounded-xl backdrop-blur-sm transition-all duration-300 border border-white/20"
             >
-              {isMobileMenuOpen ? (
-                <X className="w-5 h-5" />
-              ) : (
-                <Menu className="w-5 h-5" />
-              )}
+              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </motion.button>
           </div>
         </div>
@@ -300,10 +335,10 @@ const Navbar = () => {
             <div className="flex flex-col gap-2 pb-4">
               {/* Navigation Items */}
               {navItems.map((item, index) => (
-                <motion.button  // ← Changed from 'a' to 'button'
+                <motion.button
                   key={item.key}
                   onClick={() => {
-                    navigate(item.href);  // ← Use navigate instead of href
+                    navigate(item.href);
                     setIsMobileMenuOpen(false);
                   }}
                   initial={{ opacity: 0, x: -20 }}
@@ -314,7 +349,6 @@ const Navbar = () => {
                   {item.label}
                 </motion.button>
               ))}
-
 
               {/* Mobile Auth Buttons (only show if not logged in) */}
               {!user && (
