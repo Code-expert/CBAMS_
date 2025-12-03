@@ -41,11 +41,7 @@ model User {
   email     String     @unique
   password  String
   role      Role       @default(FARMER)
-  isVerified      Boolean    @default(false)
-  otp             String? 
-  otpExpiry       DateTime?
-  resetToken      String?
-  resetTokenExpiry DateTime?
+  
   
   profile   Profile?
   shops     Shop[] 
