@@ -244,13 +244,13 @@ const ExpertDashboard = () => {
                   </span>
                 </div>
 
-                {/* ADD CONSULTATION CODE HERE */}
+                {/*  CONSULTATION CODE HERE */}
                 <div className="mb-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border-2 border-green-200">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-600 font-medium mb-1">Consultation Code</p>
                       <p className="text-2xl font-bold text-green-700 tracking-wider font-mono">
-                        {session.id.substring(0, 8).toUpperCase()}
+            {session.id.toString().substring(0, 8).toUpperCase()}
                       </p>
                     </div>
                     <button
