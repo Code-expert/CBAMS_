@@ -107,6 +107,15 @@ const ExpertCard = ({ expert, onBook, onChat }) => (
 );
 
 const UpcomingSessionCard = ({ session, onJoin, onCancel }) => {
+  const [copied, setCopied] = useState(false);
+
+  const copyCode = () => {
+    const code = session.id.substring(0, 8).toUpperCase();
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const getStatusBadge = (status) => {
     const config = {
       PENDING: { bg: 'bg-yellow-100', text: 'text-yellow-700', label: 'Pending' },
@@ -128,7 +137,40 @@ const UpcomingSessionCard = ({ session, onJoin, onCancel }) => {
         <h4 className="font-bold text-gray-900 text-lg">Dr. {session.expert?.name || session.farmer?.name}</h4>
         {getStatusBadge(session.status)}
       </div>
+      
+      {/* ADD CONSULTATION CODE HERE */}
+      <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
+        <div className="flex items-center justify-between">
+          <div className="flex-1">
+            <p className="text-xs text-gray-600 font-semibold mb-1">Consultation Code</p>
+            <p className="text-xl font-black text-blue-700 tracking-wider font-mono">
+              {session.id.substring(0, 8).toUpperCase()}
+            </p>
+          </div>
+          <button
+            onClick={copyCode}
+            className="ml-3 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all flex items-center gap-1.5 text-sm font-bold"
+          >
+            {copied ? (
+              <>
+                <CheckCircle className="w-4 h-4" />
+                Copied!
+              </>
+            ) : (
+              <>
+                <MessageCircle className="w-4 h-4" />
+                Share
+              </>
+            )}
+          </button>
+        </div>
+        <p className="text-xs text-gray-500 mt-1.5">
+          Share this code with Dr. {session.expert?.name}
+        </p>
+      </div>
+
       <p className="text-sm text-gray-600 mb-4 font-medium">Agricultural Consultation</p>
+      
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4 text-sm text-gray-700">
           <div className="flex items-center space-x-2 bg-green-50 px-3 py-2 rounded-lg">
@@ -161,6 +203,7 @@ const UpcomingSessionCard = ({ session, onJoin, onCancel }) => {
     </div>
   );
 };
+
 
 const SessionTypeCard = ({ icon: Icon, title, description }) => (
   <div className="bg-white rounded-xl border-2 border-gray-100 p-4 hover:border-green-300 hover:bg-green-50 transition-all cursor-pointer group">
