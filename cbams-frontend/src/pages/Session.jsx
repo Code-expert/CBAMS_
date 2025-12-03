@@ -144,7 +144,7 @@ const UpcomingSessionCard = ({ session, onJoin, onCancel }) => {
           <div className="flex-1">
             <p className="text-xs text-gray-600 font-semibold mb-1">Consultation Code</p>
             <p className="text-xl font-black text-blue-700 tracking-wider font-mono">
-              {session.id.substring(0, 8).toUpperCase()}
+{session.id.toString().substring(0, 8).toUpperCase()}
             </p>
           </div>
           <button
