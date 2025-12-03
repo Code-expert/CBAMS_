@@ -22,7 +22,7 @@ dotenv.config();
 const app = express();
 
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5000','https://cbams-o3j3.vercel.app','https://cbams.onrender.com'],
+  origin: ['http://localhost:5173', 'http://localhost:5000','https://cbams.vercel.app','https://cbams-1-6v7m.onrender.com'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
