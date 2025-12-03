@@ -12,11 +12,12 @@ const server = http.createServer(app);
 // Create Socket.IO server
 const io = new Server(server, {
   cors: {
-    origin: ["https://cbams.vercel.app/login","http://localhost:5173", "http://localhost:5000"],
-    methods: ["GET", "POST"],
+    origin: ["https://cbams.vercel.app", "http://localhost:5173", "http://localhost:5000"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     credentials: true
   }
 });
+
 
 // Socket.IO connection handling for WebRTC
 io.on('connection', (socket) => {
