@@ -1,48 +1,40 @@
 import http from 'http';
 import { Server } from 'socket.io';
 import app from './app.js';
-import { PrismaClient } from '@prisma/client'; // ✅ Correct Prisma import
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 5000;
 
-// Create HTTP server
 const server = http.createServer(app);
 
-// Create Socket.IO server
 const io = new Server(server, {
   cors: {
-    origin: ["https://cbams.vercel.app", "http://localhost:5173", "http://localhost:5000"],
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    origin: ['https://cbams.vercel.app', 'http://localhost:5173', 'http://localhost:5000'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true
   }
 });
 
-
-// Socket.IO connection handling for WebRTC
 io.on('connection', (socket) => {
   console.log('✅ User connected:', socket.id);
 
   // Join video call room
   socket.on('join-room', (roomId) => {
-  socket.join(roomId);
-  const room = io.sockets.adapter.rooms.get(roomId);
-  const numClients = room ? room.size : 0;
-  if (numClients === 2) {
-    // Notify both that the room is ready, one of them will become caller
-    io.to(roomId).emit('room-ready');
+    socket.join(roomId);
     console.log(`📹 User ${socket.id} joined room: ${roomId}`);
-    socket.to(roomId).emit('user-connected', socket.id);
+
+    const room = io.sockets.adapter.rooms.get(roomId);
+    const numClients = room ? room.size : 0;
+
+    if (numClients === 2) {
+      // Notify both that the room is ready (client will decide who calls)
+      io.to(roomId).emit('room-ready');
+      // Optional: also keep old event if you still use it
+      socket.to(roomId).emit('user-connected', socket.id);
+    }
   });
 
-  socketRef.current.on('room-ready', () => {
-  setIsWaiting(false);
-  if (!peerRef.current) createPeerConnection();
-
-  const shouldCall = socketRef.current.id === roomOwnerIdLogic(); // e.g. min socket.id
-  if (shouldCall) createOffer();
-});
-  
   // WebRTC offer (caller sends to callee)
   socket.on('offer', (offer, roomId) => {
     console.log('📤 Sending offer to room:', roomId);
@@ -60,15 +52,13 @@ io.on('connection', (socket) => {
     socket.to(roomId).emit('ice-candidate', candidate);
   });
 
-  // ✅ Handle user leaving room
+  // Handle user leaving room
   socket.on('leave-room', async (roomId) => {
     console.log(`👋 User ${socket.id} leaving room: ${roomId}`);
     socket.leave(roomId);
-    
-    // Check if room is now empty (both users left)
+
     const room = io.sockets.adapter.rooms.get(roomId);
     if (!room || room.size === 0) {
-      // Auto-complete session when both users have left
       try {
         const session = await prisma.session.findFirst({
           where: { videoRoomId: roomId }
@@ -87,17 +77,15 @@ io.on('connection', (socket) => {
     }
   });
 
-  // ✅ Handle disconnect
+  // Handle disconnect
   socket.on('disconnect', async () => {
     console.log('❌ User disconnected:', socket.id);
-    
-    // Get all rooms this socket was in
+
     const rooms = Array.from(socket.rooms);
-    
-    // Check each room for emptiness
+
     for (const roomId of rooms) {
-      if (roomId === socket.id) continue; // Skip the socket's own room
-      
+      if (roomId === socket.id) continue;
+
       const room = io.sockets.adapter.rooms.get(roomId);
       if (!room || room.size === 0) {
         try {
@@ -120,8 +108,7 @@ io.on('connection', (socket) => {
   });
 });
 
-// Start server
-server.listen(PORT,'0.0.0.0', () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`🔌 Socket.IO ready for WebRTC`);
+  console.log('🔌 Socket.IO ready for WebRTC');
 });
