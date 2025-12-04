@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../redux/slices/authSlice.js';
 
-const Navbar = () => {
+const Navbar = () => {S
   const { t, i18n } = useTranslation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
@@ -38,42 +38,7 @@ const Navbar = () => {
       }
     ];
 
-    switch (user.role) {
-      case 'FARMER':
-        return [
-          ...baseItems,
-          { href: "/orders", label: t("Orders") || "Orders", key: "orders" },
-          { href: "/schedules", label: t("Schedules") || "Schedules", key: "schedules" },
-          { href: "/session", label: t("Sessions") || "Sessions", key: "sessions" }
-        ];
-
-      case 'EXPERT':
-        // ✅ ADDED: Expert-specific navigation
-        return [
-          ...baseItems,
-          { href: "/session", label: t("Consultations") || "Consultations", key: "consultations" },
-          { href: "/expert/profile/edit", label: t("Edit Profile") || "Edit Profile", key: "profile" }
-        ];
-
-      case 'SELLER':
-        return [
-          ...baseItems,
-          { href: "/seller", label: t("shops") || "My Shops", key: "shops" },
-          { href: "/marketplace", label: t("marketplace") || "Marketplace", key: "marketplace" },
-          { href: "/orders", label: t("orders") || "Orders", key: "orders" }
-        ];
-
-      case 'ADMIN':
-        return [
-          ...baseItems,
-          { href: "/admin", label: t("admin") || "Admin Panel", key: "admin" },
-          { href: "/marketplace", label: t("marketplace") || "Marketplace", key: "marketplace" },
-          { href: "/admin/orders", label: t("orders") || "All Orders", key: "orders" }
-        ];
-
-      default:
-        return baseItems;
-    }
+   
   };
 
   const navItems = getNavItems();
@@ -101,8 +66,6 @@ const Navbar = () => {
     const baseItems = [
       { icon: User, label: t("profile") || "Profile", href: "/profile" },
       { icon: Settings, label: t("settings") || "Settings", href: "/profile" },
-      { icon: Bell, label: t("notifications") || "Notifications", href: "/notifications" },
-      { icon: MessageCircle, label: t("messages") || "Messages", href: "/messages" },
     ];
 
     // Add expert-specific menu item
@@ -129,11 +92,11 @@ const Navbar = () => {
 
   // ✅ ADDED: Helper function to get dashboard route
   const getDashboardRoute = () => {
-    return user?.role === 'EXPERT' ? '/expert-dashboard' : '/dashboard';
+    return user?.role === 'EXPERT' ? '/expert/dashboard' : '/dashboard';
   };
 
   return (
-    <motion.nav
+    <motion.navS
       initial={{ y: -50, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
