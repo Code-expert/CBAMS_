@@ -83,7 +83,13 @@ const VideoCall = () => {
         console.error('ICE candidate error:', err);
       }
     });
+    socketRef.current.on('room-ready', () => {
+    setIsWaiting(false);
+    if (!peerRef.current) createPeerConnection();
 
+    const shouldCall = socketRef.current.id === roomOwnerIdLogic(); // e.g. min socket.id
+    if (shouldCall) createOffer();
+});
     // Initialize media
     initMedia();
 
