@@ -8,14 +8,10 @@ export default defineConfig({
   plugins: [
     tailwindcss(),
     react()],
-<<<<<<< HEAD
   preview: {
     allowedHosts: ['cbams-1.onrender.com', 'localhost'],
     host: '0.0.0.0',
     port: process.env.PORT || 10000,
   }
 
-=======
-    
->>>>>>> 6f6ab3b (Done)
 })
