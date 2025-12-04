@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -14,7 +14,9 @@ import {
   Users,
   Loader2,
   Copy,
-  Check
+  Check,
+  RefreshCw,
+  Edit
 } from 'lucide-react';
 import sessionService from '../services/sessionService';
 
@@ -30,6 +32,7 @@ const ExpertDashboard = () => {
     completed: 0
   });
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState('all');
   const [copiedId, setCopiedId] = useState(null);
 
@@ -41,9 +44,20 @@ const ExpertDashboard = () => {
     fetchSessions();
   }, [user, navigate]);
 
-  const fetchSessions = async () => {
+  // ✅ AUTO-REFRESH: Fetch sessions every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchSessions(true); // Silent refresh (no loading spinner)
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchSessions = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
+      setRefreshing(true);
+      
       const response = await sessionService.getExpertSessions();
 
       let sessionsData = [];
@@ -71,6 +85,7 @@ const ExpertDashboard = () => {
       setStats({ total: 0, pending: 0, confirmed: 0, completed: 0 });
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -78,10 +93,10 @@ const ExpertDashboard = () => {
     try {
       await sessionService.confirmSession(sessionId);
       fetchSessions();
-      alert('Session confirmed successfully!');
+      showToast('Session confirmed successfully!', 'success');
     } catch (error) {
       console.error('Error confirming session:', error);
-      alert('Failed to confirm session');
+      showToast('Failed to confirm session', 'error');
     }
   };
 
@@ -90,17 +105,36 @@ const ExpertDashboard = () => {
     try {
       await sessionService.updateSessionStatus(sessionId, 'CANCELLED');
       fetchSessions();
-      alert('Session declined');
+      showToast('Session declined', 'error');
     } catch (error) {
       console.error('Error declining session:', error);
-      alert('Failed to decline session');
+      showToast('Failed to decline session', 'error');
     }
   };
 
+  // ✅ ENHANCED: Copy with toast notification
   const copyCode = (code, sessionId) => {
     navigator.clipboard.writeText(code);
     setCopiedId(sessionId);
+    showToast('Code copied to clipboard!', 'success');
     setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  // ✅ NEW: Toast notification system
+  const showToast = (message, type = 'success') => {
+    const toast = document.createElement('div');
+    toast.textContent = message;
+    toast.className = `fixed top-4 right-4 px-6 py-3 rounded-xl shadow-2xl z-50 font-semibold text-white animate-fade-in ${
+      type === 'success' ? 'bg-green-500' : 'bg-red-500'
+    }`;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(-20px)';
+      toast.style.transition = 'all 0.3s ease';
+      setTimeout(() => document.body.removeChild(toast), 300);
+    }, 3000);
   };
 
   const filteredSessions = sessions.filter(session => {
@@ -132,17 +166,40 @@ const ExpertDashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 p-4 sm:p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-2">
-            Welcome, Dr. {user?.name}
-          </h1>
-          <p className="text-gray-600 text-sm sm:text-base">Expert Consultation Dashboard</p>
+        {/* ✅ ENHANCED: Header with Edit Profile + Refresh */}
+        <div className="flex items-center justify-between mb-6 sm:mb-8">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-2">
+              Welcome, Dr. {user?.name}
+            </h1>
+            <p className="text-gray-600 text-sm sm:text-base">Expert Consultation Dashboard</p>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            {/* Refresh Button */}
+            <button
+              onClick={() => fetchSessions()}
+              disabled={refreshing}
+              className="p-2 sm:p-3 bg-white rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-50"
+              title="Refresh sessions"
+            >
+              <RefreshCw className={`w-5 h-5 text-gray-700 ${refreshing ? 'animate-spin' : ''}`} />
+            </button>
+            
+            {/* Edit Profile Button */}
+            <button
+              onClick={() => navigate('/expert/profile/edit')}
+              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-medium hover:shadow-lg transition-all"
+            >
+              <Edit className="w-4 h-4" />
+              <span>Edit Profile</span>
+            </button>
+          </div>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
-          <div className="bg-white rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-shadow">
+          <div className="bg-white rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-shadow cursor-pointer" onClick={() => setFilter('all')}>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs sm:text-sm text-gray-600 mb-1">Total Sessions</p>
@@ -152,7 +209,7 @@ const ExpertDashboard = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-shadow">
+          <div className="bg-white rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-shadow cursor-pointer" onClick={() => setFilter('pending')}>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs sm:text-sm text-gray-600 mb-1">Pending</p>
@@ -162,7 +219,7 @@ const ExpertDashboard = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-shadow">
+          <div className="bg-white rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-shadow cursor-pointer" onClick={() => setFilter('confirmed')}>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs sm:text-sm text-gray-600 mb-1">Confirmed</p>
@@ -172,7 +229,7 @@ const ExpertDashboard = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-shadow">
+          <div className="bg-white rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-shadow cursor-pointer" onClick={() => setFilter('completed')}>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs sm:text-sm text-gray-600 mb-1">Completed</p>
@@ -199,6 +256,14 @@ const ExpertDashboard = () => {
             </button>
           ))}
         </div>
+
+        {/* ✅ ENHANCED: Auto-refresh indicator */}
+        {refreshing && !loading && (
+          <div className="mb-4 flex items-center justify-center gap-2 text-sm text-gray-600">
+            <RefreshCw className="w-4 h-4 animate-spin" />
+            <span>Updating sessions...</span>
+          </div>
+        )}
 
         {/* Sessions List */}
         <div className="space-y-4">
@@ -241,7 +306,7 @@ const ExpertDashboard = () => {
                   </span>
                 </div>
 
-                {/* ✅ UPDATED: Prominent Consultation Code */}
+                {/* Consultation Code */}
                 <div className="mb-4 p-4 sm:p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-300 shadow-md">
                   <div className="text-center mb-3">
                     <p className="text-xs sm:text-sm text-blue-700 font-bold mb-2 flex items-center justify-center gap-2">
