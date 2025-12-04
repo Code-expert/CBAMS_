@@ -41,8 +41,13 @@ const appRouter = createBrowserRouter([
       },
       {
         path: '/video-call/:roomId',
-        element: <VideoCall/>,
+        element: (
+          <ProtectedRoute>
+            <VideoCall />
+          </ProtectedRoute>
+        ),
       },
+
       {
         path: '/dashboard',
         element: (
@@ -109,7 +114,7 @@ const appRouter = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      
+
     ],
   },
 ]);
