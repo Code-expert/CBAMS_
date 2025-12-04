@@ -25,7 +25,8 @@ io.on('connection', (socket) => {
 
   // Join video call room
   socket.on('join-room', (roomId) => {
-    socket.join(roomId);
+    const room = roomId || sessionId;
+    socket.join(room);
     console.log(`📹 User ${socket.id} joined room: ${roomId}`);
     socket.to(roomId).emit('user-connected', socket.id);
   });
