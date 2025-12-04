@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-// import { scheduleTaskReminder, cancelTaskReminder } from "../services/taskCron.js";
 
 const prisma = new PrismaClient();
 
@@ -13,15 +12,15 @@ export const getTasks = async (req, res) => {
     const tasks = await prisma.task.findMany({
       where: { userId: req.user.id },
       orderBy: [
-        { dueDate: 'asc' },
-        { createdAt: 'desc' }
+        { dueDate: "asc" },
+        { createdAt: "desc" }
       ]
     });
 
     res.json(tasks);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    console.error("Error fetching tasks:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
@@ -35,16 +34,16 @@ export const getTaskStats = async (req, res) => {
     const userId = req.user.id;
 
     const [pending, inProgress, completed, total] = await Promise.all([
-      prisma.task.count({ where: { userId, status: 'PENDING' } }),
-      prisma.task.count({ where: { userId, status: 'IN_PROGRESS' } }),
-      prisma.task.count({ where: { userId, status: 'COMPLETED' } }),
+      prisma.task.count({ where: { userId, status: "PENDING" } }),
+      prisma.task.count({ where: { userId, status: "IN_PROGRESS" } }),
+      prisma.task.count({ where: { userId, status: "COMPLETED" } }),
       prisma.task.count({ where: { userId } })
     ]);
 
     res.json({ pending, inProgress, completed, total });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    console.error("Error fetching task stats:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
@@ -64,30 +63,20 @@ export const createTask = async (req, res) => {
     const task = await prisma.task.create({
       data: {
         title,
-        description,
+        description: description ?? null,
         time,
         dueDate: dueDate ? new Date(dueDate) : new Date(),
-        priority: priority || 'MEDIUM',
-        icon: icon || 'Sprout',
+        priority: priority || "MEDIUM",
+        icon: icon || "Sprout",
         reminderEnabled: reminderEnabled !== false,
         userId: req.user.id
-      },
-      include: {
-        user: {
-          include: { profile: true }
-        }
       }
     });
 
-    // Schedule SMS reminder if enabled
-    if (task.reminderEnabled && task.user.profile?.phone) {
-      scheduleTaskReminder(task);
-    }
-
     res.status(201).json(task);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    console.error("Error creating task:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
@@ -109,35 +98,25 @@ export const updateTask = async (req, res) => {
       return res.status(404).json({ message: "Task not found" });
     }
 
+    const data = {};
+    if (title !== undefined) data.title = title;
+    if (description !== undefined) data.description = description;
+    if (time !== undefined) data.time = time;
+    if (dueDate !== undefined) data.dueDate = dueDate ? new Date(dueDate) : existingTask.dueDate;
+    if (priority !== undefined) data.priority = priority;
+    if (status !== undefined) data.status = status;
+    if (icon !== undefined) data.icon = icon;
+    if (reminderEnabled !== undefined) data.reminderEnabled = reminderEnabled;
+
     const task = await prisma.task.update({
       where: { id: Number(id) },
-      data: {
-        ...(title && { title }),
-        ...(description !== undefined && { description }),
-        ...(time && { time }),
-        ...(dueDate && { dueDate: new Date(dueDate) }),
-        ...(priority && { priority }),
-        ...(status && { status }),
-        ...(icon && { icon }),
-        ...(reminderEnabled !== undefined && { reminderEnabled })
-      },
-      include: {
-        user: { include: { profile: true } }
-      }
+      data
     });
-
-    // Reschedule reminder if time/date changed
-    if (time || dueDate) {
-      cancelTaskReminder(task.id);
-      if (task.reminderEnabled && task.user.profile?.phone) {
-        scheduleTaskReminder(task);
-      }
-    }
 
     res.json(task);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    console.error("Error updating task:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
@@ -164,15 +143,10 @@ export const updateTaskStatus = async (req, res) => {
       data: { status }
     });
 
-    // Cancel reminder if task completed
-    if (status === 'COMPLETED') {
-      cancelTaskReminder(task.id);
-    }
-
     res.json(task);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    console.error("Error updating task status:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
@@ -193,15 +167,13 @@ export const deleteTask = async (req, res) => {
       return res.status(404).json({ message: "Task not found" });
     }
 
-    cancelTaskReminder(Number(id));
-
     await prisma.task.delete({
       where: { id: Number(id) }
     });
 
     res.json({ message: "Task deleted successfully" });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    console.error("Error deleting task:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
