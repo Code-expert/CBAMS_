@@ -1,10 +1,21 @@
 import { PrismaClient } from "@prisma/client";
 import { v4 as uuid } from "uuid";
+
 const prisma = new PrismaClient();
+
+// ✅ Generate 6-digit session code
+function generateSessionCode() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
 
 export const bookSession = async (req, res) => {
   try {
-    const { expertId, date } = req.body;
+    const { expertId, date, time, mode, description } = req.body;
+
+    // ✅ Validate required fields
+    if (!expertId || !date) {
+      return res.status(400).json({ message: "Expert ID and date are required" });
+    }
 
     // Ensure only FARMER can book
     if (req.user.role !== "FARMER") {
@@ -12,40 +23,53 @@ export const bookSession = async (req, res) => {
     }
 
     // Validate expert existence
-    const expert = await prisma.user.findUnique({ where: { id: expertId } });
+    const expert = await prisma.user.findUnique({ 
+      where: { id: Number(expertId) } 
+    });
+    
     if (!expert || expert.role !== "EXPERT") {
       return res.status(400).json({ message: "Invalid expert ID" });
     }
 
-    // Prevent duplicate pending sessions for the same date
-    const existingSession = await prisma.session.findFirst({
-      where: {
-        farmerId: req.user.id,
-        expertId,
-        date: new Date(date),
-        status: "PENDING",
-      },
-    });
+    // ✅ Generate 6-digit session code
+    const sessionCode = generateSessionCode();
 
-    if (existingSession) {
-      return res.status(400).json({ message: "Session already requested for this date" });
-    }
-
+    // ✅ Create session with all fields
     const session = await prisma.session.create({
       data: {
         farmerId: req.user.id,
-        expertId,
+        expertId: Number(expertId),
         date: new Date(date),
+        time: time || null,
+        mode: mode || "VIDEO",
+        description: description || null,
+        videoRoomId: sessionCode, // Store 6-digit code
+        status: "PENDING"
       },
+      include: {
+        expert: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            profile: true
+          }
+        }
+      }
     });
 
-    res.status(201).json({ message: "Session requested successfully", session });
+    res.status(201).json({ 
+      message: "Session requested successfully", 
+      session 
+    });
   } catch (err) {
     console.error("Error booking session:", err);
-    res.status(500).json({ message: "Server error", error: err.message });
+    res.status(500).json({ 
+      message: "Server error", 
+      error: err.message 
+    });
   }
 };
-
 
 export const confirmSession = async (req, res) => {
   try {
@@ -70,15 +94,23 @@ export const confirmSession = async (req, res) => {
       return res.status(403).json({ message: "You are not authorized to confirm this session" });
     }
 
-    // Generate unique room ID
-    const roomId = uuid();
-
+    // ✅ Keep existing videoRoomId, don't regenerate
     const updatedSession = await prisma.session.update({
       where: { id: Number(id) },
       data: {
         status: "CONFIRMED",
-        videoRoomId: roomId, // save only room ID
+        // videoRoomId is already set during booking, don't overwrite
       },
+      include: {
+        farmer: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            profile: true
+          }
+        }
+      }
     });
 
     res.json({
@@ -101,7 +133,14 @@ export const getFarmerSessions = async (req, res) => {
     const sessions = await prisma.session.findMany({
       where: { farmerId: req.user.id },
       include: {
-        expert: { select: { id: true, name: true, email: true } },
+        expert: { 
+          select: { 
+            id: true, 
+            name: true, 
+            email: true,
+            profile: true 
+          } 
+        },
       },
       orderBy: { date: "desc" },
     });
@@ -117,28 +156,31 @@ export const getFarmerSessions = async (req, res) => {
 export const getExpertSessions = async (req, res) => {
   try {
     const expertId = req.user.id;
-
     const sessions = await prisma.session.findMany({
       where: { expertId },
       include: {
         farmer: {
-          include: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
             profile: true
           }
-        }
+        },
       },
       orderBy: {
         date: 'desc'
       }
     });
 
-    // ✅ Return array directly, not wrapped in object
+    // ✅ Return array directly
     res.json(sessions);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error fetching expert sessions:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
 export const updateSessionStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -174,7 +216,7 @@ export const updateSessionStatus = async (req, res) => {
       session: updatedSession
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error updating session status:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
