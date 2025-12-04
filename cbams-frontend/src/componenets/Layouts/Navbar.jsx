@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../redux/slices/authSlice.js';
 
-const Navbar = () => {S
+const Navbar = () => {
   const { t, i18n } = useTranslation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
@@ -22,23 +22,23 @@ const Navbar = () => {S
     if (!user) {
       // Logged-out navigation
       return [
-        { href: "/", label: t("Home") || "Home", key: "home" },
-        { href: "/about", label: t("About") || "About", key: "about" },
-        { href: "/features", label: t("Features") || "Features", key: "features" },
+        { href: "/", label: t("home") || "Home", key: "home" },
+        { href: "/about", label: t("about") || "About", key: "about" },
+        { href: "/features", label: t("features") || "Features", key: "features" },
       ];
     }
 
     // Logged-in navigation - role based
     const baseItems = [
-      // ✅ CHANGED: Dynamic dashboard based on role
+      // ✅ Dynamic dashboard based on role
       { 
         href: user.role === 'EXPERT' ? "/expert/dashboard" : "/dashboard", 
-        label: t("Dashboard") || "Dashboard", 
+        label: t("dashboard") || "Dashboard", 
         key: "dashboard" 
       }
     ];
 
-   
+    return baseItems;
   };
 
   const navItems = getNavItems();
@@ -61,18 +61,18 @@ const Navbar = () => {S
     setIsProfileDropdownOpen(false);
   };
 
-  // ✅ CHANGED: Dynamic profile menu items based on role
+  // ✅ Dynamic profile menu items based on role
   const getProfileMenuItems = () => {
     const baseItems = [
       { icon: User, label: t("profile") || "Profile", href: "/profile" },
-      { icon: Settings, label: t("settings") || "Settings", href: "/profile" },
+      { icon: Settings, label: t("settings") || "Settings", href: "/settings" },
     ];
 
     // Add expert-specific menu item
     if (user?.role === 'EXPERT') {
       baseItems.splice(1, 0, {
         icon: Settings,
-        label: t("Edit Expert Profile") || "Edit Expert Profile",
+        label: t("expertProfile") || "Edit Expert Profile",
         href: "/expert/profile/edit"
       });
     }
@@ -88,15 +88,15 @@ const Navbar = () => {S
     return baseItems;
   };
 
-  const profileMenuItems = getProfileMenuItems();
+  const profileMenuItems = user ? getProfileMenuItems() : [];
 
-  // ✅ ADDED: Helper function to get dashboard route
+  // ✅ Helper function to get dashboard route
   const getDashboardRoute = () => {
     return user?.role === 'EXPERT' ? '/expert/dashboard' : '/dashboard';
   };
 
   return (
-    <motion.navS
+    <motion.nav // ✅ FIXED: Removed stray 'S'
       initial={{ y: -50, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
@@ -104,7 +104,7 @@ const Navbar = () => {S
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo - ✅ CHANGED: Dynamic navigation on click */}
+          {/* Logo */}
           <motion.div
             whileHover={{ scale: 1.05 }}
             onClick={() => navigate(user ? getDashboardRoute() : "/")}
@@ -226,18 +226,17 @@ const Navbar = () => {S
                 </motion.button>
 
                 {/* Signup Button */}
-                <div onClick={() => navigate('/login')} className="hidden sm:block ml-2">
-                  <motion.button
-                    whileTap={{ scale: 0.95 }}
-                    className="px-4 py-2 text-sm font-medium bg-yellow-400 text-green-800 hover:bg-yellow-300 rounded-xl transition-all duration-300 font-semibold shadow-lg"
-                  >
-                    {t("Signup") || "Sign Up"}
-                  </motion.button>
-                </div>
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => navigate('/login')}
+                  className="hidden sm:block px-4 py-2 text-sm font-medium bg-yellow-400 text-green-800 hover:bg-yellow-300 rounded-xl transition-all duration-300 font-semibold shadow-lg"
+                >
+                  {t("signup") || "Sign Up"}
+                </motion.button>
               </>
             )}
 
-            {/* Language Dropdown (Available for both logged-in and logged-out users) */}
+            {/* Language Dropdown */}
             <div className="relative">
               <motion.button
                 whileTap={{ scale: 0.95 }}
@@ -313,7 +312,7 @@ const Navbar = () => {S
                 </motion.button>
               ))}
 
-              {/* Mobile Auth Buttons (only show if not logged in) */}
+              {/* Mobile Auth Buttons */}
               {!user && (
                 <>
                   <motion.button
