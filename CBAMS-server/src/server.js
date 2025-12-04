@@ -25,12 +25,24 @@ io.on('connection', (socket) => {
 
   // Join video call room
   socket.on('join-room', (roomId) => {
-    const room = roomId || sessionId;
-    socket.join(room);
+  socket.join(roomId);
+  const room = io.sockets.adapter.rooms.get(roomId);
+  const numClients = room ? room.size : 0;
+  if (numClients === 2) {
+    // Notify both that the room is ready, one of them will become caller
+    io.to(roomId).emit('room-ready');
     console.log(`📹 User ${socket.id} joined room: ${roomId}`);
     socket.to(roomId).emit('user-connected', socket.id);
   });
 
+  socketRef.current.on('room-ready', () => {
+  setIsWaiting(false);
+  if (!peerRef.current) createPeerConnection();
+
+  const shouldCall = socketRef.current.id === roomOwnerIdLogic(); // e.g. min socket.id
+  if (shouldCall) createOffer();
+});
+  
   // WebRTC offer (caller sends to callee)
   socket.on('offer', (offer, roomId) => {
     console.log('📤 Sending offer to room:', roomId);
