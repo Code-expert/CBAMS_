@@ -14,20 +14,29 @@ export const bookSession = async (req, res) => {
 
     // ✅ Validate required fields
     if (!expertId || !date) {
+      console.log('⚠️ Booking failed: Missing expertId or date', { expertId, date });
       return res.status(400).json({ message: "Expert ID and date are required" });
+    }
+
+    const expertIdNum = Number(expertId);
+    if (isNaN(expertIdNum)) {
+      console.log('⚠️ Booking failed: expertId is not a number', { expertId });
+      return res.status(400).json({ message: "Invalid Expert ID format" });
     }
 
     // Ensure only FARMER can book
     if (req.user.role !== "FARMER") {
+      console.log('⚠️ Booking failed: User is not a farmer', { role: req.user.role });
       return res.status(403).json({ message: "Only farmers can book sessions" });
     }
 
     // Validate expert existence
     const expert = await prisma.user.findUnique({ 
-      where: { id: Number(expertId) } 
+      where: { id: expertIdNum } 
     });
     
     if (!expert || expert.role !== "EXPERT") {
+      console.log('⚠️ Booking failed: Expert not found or invalid role', { expertIdNum, expert });
       return res.status(400).json({ message: "Invalid expert ID" });
     }
 
@@ -37,8 +46,8 @@ export const bookSession = async (req, res) => {
     // ✅ Create session with all fields
     const session = await prisma.session.create({
       data: {
-        farmerId: req.user.id,
-        expertId: Number(expertId),
+        farmerId: Number(req.user.id),
+        expertId: expertIdNum,
         date: new Date(date),
         time: time || null,
         mode: mode || "VIDEO",
@@ -63,10 +72,11 @@ export const bookSession = async (req, res) => {
       session 
     });
   } catch (err) {
-    console.error("Error booking session:", err);
+    console.error("❌ CRITICAL ERROR booking session:", err);
     res.status(500).json({ 
       message: "Server error", 
-      error: err.message 
+      error: err.message,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
     });
   }
 };

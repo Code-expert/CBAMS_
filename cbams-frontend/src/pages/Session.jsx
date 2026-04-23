@@ -318,7 +318,8 @@ const ExpertConsultationPage = () => {
       alert('Session requested! Please share the room code with the expert once confirmed.');
     } catch (err) {
       console.error('Error booking session:', err);
-      alert('Failed to book session');
+      const errorMsg = err.response?.data?.message || err.message || 'Failed to book session. Please try again.';
+      setError(errorMsg);
     }
   };
 
