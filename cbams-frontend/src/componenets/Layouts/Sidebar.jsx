@@ -9,7 +9,8 @@ import {
   ShoppingCart,
   Bot,
   Users,
-  Tv
+  Tv,
+  Droplet
 } from 'lucide-react';
 import { translations } from '../../constants/languages';
 
@@ -19,6 +20,7 @@ const Sidebar = ({ sidebarOpen, activeTab, setActiveTab, currentLanguage }) => {
   const sidebarItems = [
     { id: 'overview', icon: BarChart3, label: t('overview') },
     { id: 'analytics', icon: TrendingUp, label: t('analytics') },
+    { id: 'fertilizer', icon: Droplet, label: t('fertilizer') },
     { id: 'tasks', icon: Calendar, label: t('tasks') },
     { id: 'marketplace', icon: ShoppingCart, label: t('marketplace') },
     { id: 'chatbot', icon: Bot, label: t('aiAssistant') },
@@ -51,8 +53,8 @@ const Sidebar = ({ sidebarOpen, activeTab, setActiveTab, currentLanguage }) => {
                         : 'hover:bg-green-50 text-gray-600 hover:text-green-600'
                     }`}
                   >
-                    <Icon className="w-5 h-5" />
-                    <span className="font-medium">{item.label}</span>
+                    <Icon className="w-5 h-5 flex-shrink-0" />
+                    <span className="font-medium whitespace-nowrap overflow-hidden text-ellipsis">{item.label}</span>
                   </button>
                 );
               })}

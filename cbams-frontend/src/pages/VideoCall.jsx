@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import io from 'socket.io-client';
 import { useSelector } from 'react-redux';
 import { Mic, MicOff, Video as VideoIcon, VideoOff, PhoneOff, Loader2 } from 'lucide-react';
@@ -261,9 +262,14 @@ const VideoCall = () => {
     }
   };
 
+  const [showCallEnded, setShowCallEnded] = useState(false);
+
   const endCall = () => {
+    setShowCallEnded(true);
     cleanup();
-    navigate('/consultations');
+    setTimeout(() => {
+      navigate('/consultations');
+    }, 2500);
   };
 
   const cleanup = () => {
@@ -291,6 +297,34 @@ const VideoCall = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col">
+      <AnimatePresence>
+        {showCallEnded && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 z-[100] bg-gray-900 flex flex-col items-center justify-center text-center p-6"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              className="bg-gray-800 rounded-[3rem] p-12 shadow-2xl border border-gray-700 max-w-md w-full"
+            >
+              <div className="w-24 h-24 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-8">
+                <PhoneOff className="w-10 h-10 text-red-500" />
+              </div>
+              <h2 className="text-4xl font-black text-white mb-4 tracking-tighter">Session Ended</h2>
+              <p className="text-gray-400 font-medium mb-8 leading-relaxed">
+                Thank you for your consultation. We are finalizing your session data and redirecting you back to the dashboard.
+              </p>
+              <div className="bg-gray-900/50 rounded-2xl p-4 flex items-center justify-center gap-3">
+                <Loader2 className="w-5 h-5 text-green-500 animate-spin" />
+                <span className="text-xs font-black text-green-500 uppercase tracking-widest">Redirecting in 2s...</span>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div className="bg-gray-800/90 backdrop-blur-sm text-white p-4 shadow-lg border-b border-gray-700">
         <div className="max-w-7xl mx-auto flex items-center justify-between">

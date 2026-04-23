@@ -81,7 +81,8 @@ export const translations = {
     low: 'Low',
     fetchingData: 'Fetching live data...',
     expertCall: 'Expert Call',
-    noChange: 'Same'
+    noChange: 'Same',
+    fertilizer: 'Fertilizer Advisor'
   },
   hi: {
     "Image size should be less than 5MB', 'error": "छवि का आकार 5एमबी से कम होना चाहिए', 'त्रुटि",
@@ -207,8 +208,9 @@ export const translations = {
     high: 'उच्च',
     medium: 'मध्यम',
     low: 'निम्न',
-    fetchingData: 'डेटा प्राप्त किया जा रहा है...',
-    noChange: 'समान'
+    fetchingData: 'ডेटा प्राप्त किया जा रहा है...',
+    noChange: 'समान',
+    fertilizer: 'उर्वरक सलाहकार'
   },
   pa: {
     "Type \"DELETE\" to confirm account deletion:": "ਖਾਤਾ ਮਿਟਾਉਣ ਦੀ ਪੁਸ਼ਟੀ ਕਰਨ ਲਈ \"DELETE\" ਟਾਈਪ ਕਰੋ:",
@@ -277,7 +279,8 @@ export const translations = {
     medium: 'ਮੱਧਮ',
     low: 'ਘੱਟ',
     fetchingData: 'ਡੇਟਾ ਲਿਆ ਜਾ ਰਿਹਾ ਹੈ...',
-    noChange: 'ਸਮਾਨ'
+    noChange: 'ਸਮਾਨ',
+    fertilizer: 'ਖਾਦ ਸਲਾਹਕਾਰ'
   },
   mr: {
     "Type \"DELETE\" to confirm account deletion:": "खाते हटविण्याची पुष्टी करण्यासाठी \"DELETE\" टाइप करा:",
@@ -346,7 +349,8 @@ export const translations = {
     medium: 'मध्यम',
     low: 'कमी',
     fetchingData: 'माहिती मिळवत आहे...',
-    noChange: 'समान'
+    noChange: 'समान',
+    fertilizer: 'खत सल्लागार'
   },
   gu: {
     "Type \"DELETE\" to confirm account deletion:": "એકાઉન્ટ કાઢી નાખવાની પુષ્ટિ કરવા માટે \"DELETE\" લખો:",
@@ -415,7 +419,8 @@ export const translations = {
     medium: 'મધ્યમ',
     low: 'નીચું',
     fetchingData: 'ડેટા મેળવી રહ્યા છીએ...',
-    noChange: 'સમાન'
+    noChange: 'સમાન',
+    fertilizer: 'ખાતર સલાહકાર'
   },
   ta: {
     "Type \"DELETE\" to confirm account deletion:": "கணக்கு நீக்குதலை உறுதிப்படுத்த \"DELETE\" என உள்ளிடவும்:",

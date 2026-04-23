@@ -13,6 +13,7 @@ import WeatherForecast from '../componenets/Dashboard/WeatherForecast';
 import ExpertConsultationPage from './Session';
 import Community from '../componenets/Dashboard/Community';
 import Settings from './Setting';
+import FertilizerTab from './FertilizerTab';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -32,6 +33,8 @@ const Dashboard = () => {
         );
       case 'analytics':
         return <AnalyticsTab currentLanguage={currentLanguage} />;
+      case 'fertilizer':
+        return <FertilizerTab currentLanguage={currentLanguage} />;
       case 'tasks':
         return <TasksTab currentLanguage={currentLanguage} />;
       case 'marketplace':
