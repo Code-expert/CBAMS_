@@ -13,7 +13,6 @@ import WeatherForecast from '../componenets/Dashboard/WeatherForecast';
 import ExpertConsultationPage from './Session';
 import Community from '../componenets/Dashboard/Community';
 import Settings from './Setting';
-import Playground from './Playground';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -55,8 +54,7 @@ const Dashboard = () => {
             <Community currentLanguage={currentLanguage} />
           </div>
         );
-      case 'playground':
-        return <Playground />;
+
       case 'settings':
         return (
           <div className="space-y-6">
