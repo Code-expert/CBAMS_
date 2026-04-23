@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { 
   BarChart3, 
   TrendingUp, 
@@ -14,20 +15,20 @@ import {
 } from 'lucide-react';
 import { translations } from '../../constants/languages';
 
-const Sidebar = ({ sidebarOpen, activeTab, setActiveTab, currentLanguage }) => {
+const Sidebar = ({ sidebarOpen, activeTab, currentLanguage }) => {
+  const navigate = useNavigate();
   const t = (key) => translations[currentLanguage]?.[key] || translations.en[key];
   
   const sidebarItems = [
-    { id: 'overview', icon: BarChart3, label: t('overview') },
-    { id: 'analytics', icon: TrendingUp, label: t('analytics') },
-    { id: 'fertilizer', icon: Droplet, label: t('fertilizer') },
-    { id: 'tasks', icon: Calendar, label: t('tasks') },
-    { id: 'marketplace', icon: ShoppingCart, label: t('marketplace') },
-    { id: 'chatbot', icon: Bot, label: t('aiAssistant') },
-    { id: 'session', icon: Tv, label: t('session') },
-    { id: 'weather', icon: Cloud, label: t('weather') },
-    { id: 'community', icon: Users, label: t('community') },
-    { id: 'settings', icon: Settings, label: t('settings') }
+    { id: 'overview', icon: BarChart3, label: t('overview'), path: '/dashboard' },
+    { id: 'analytics', icon: TrendingUp, label: t('analytics'), path: '/dashboard/analytics' },
+    { id: 'tasks', icon: Calendar, label: t('tasks'), path: '/dashboard/tasks' },
+    { id: 'marketplace', icon: ShoppingCart, label: t('marketplace'), path: '/dashboard/marketplace' },
+    { id: 'chatbot', icon: Bot, label: t('aiAssistant'), path: '/dashboard/chatbot' },
+    { id: 'session', icon: Tv, label: t('session'), path: '/dashboard/session' },
+    { id: 'weather', icon: Cloud, label: t('weather'), path: '/dashboard/weather' },
+    { id: 'community', icon: Users, label: t('community'), path: '/dashboard/community' },
+    { id: 'settings', icon: Settings, label: t('settings'), path: '/dashboard/settings' }
   ];
 
   return (
@@ -37,24 +38,28 @@ const Sidebar = ({ sidebarOpen, activeTab, setActiveTab, currentLanguage }) => {
           initial={{ x: -300, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           exit={{ x: -300, opacity: 0 }}
-          className="w-64 bg-white shadow-lg min-h-screen border-r border-green-100 relative z-40 lg:relative lg:z-auto"
+          className="w-64 bg-white shadow-xl min-h-screen border-r border-slate-100 relative z-40 lg:relative lg:z-auto"
         >
-          <div className="p-6">
+          <div className="p-6 sticky top-20">
             <div className="space-y-2">
               {sidebarItems.map(item => {
                 const Icon = item.icon;
+                const isActive = activeTab === item.id;
+                
                 return (
                   <button
                     key={item.id}
-                    onClick={() => setActiveTab(item.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                      activeTab === item.id 
-                        ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg'
-                        : 'hover:bg-green-50 text-gray-600 hover:text-green-600'
+                    onClick={() => navigate(item.path)}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                      isActive 
+                        ? 'bg-slate-900 text-white shadow-lg'
+                        : 'hover:bg-slate-50 text-slate-600 hover:text-slate-900'
                     }`}
                   >
                     <Icon className="w-5 h-5 flex-shrink-0" />
-                    <span className="font-medium whitespace-nowrap overflow-hidden text-ellipsis">{item.label}</span>
+                    <span className="font-bold text-xs uppercase tracking-widest overflow-hidden text-ellipsis whitespace-nowrap">
+                      {item.label}
+                    </span>
                   </button>
                 );
               })}

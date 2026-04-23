@@ -26,7 +26,12 @@ import { useSelector } from 'react-redux';
 import axios from '../utils/axiosConfig';
 import { useTranslation } from 'react-i18next';
 
-const MarketplaceTab = ({ currentLanguage }) => {
+import { useOutletContext } from 'react-router-dom';
+
+const MarketplaceTab = ({ currentLanguage: propLanguage }) => {
+  const context = useOutletContext() || {};
+  const currentLanguage = propLanguage || context.currentLanguage || 'en';
+
   const { t } = useTranslation();
   const { user } = useSelector((state) => state.auth);
   

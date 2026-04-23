@@ -8,8 +8,12 @@ import WeatherForecast from './WeatherForecast';
 import RecentActivity from './RecentActivity';
 import CropRecommendation from './CropRecommendation';
 
+import { useOutletContext } from 'react-router-dom';
 
-const OverviewTab = ({ currentLanguage, selectedTask, setSelectedTask }) => {
+const OverviewTab = ({ currentLanguage: propLanguage }) => {
+  const context = useOutletContext() || {};
+  const currentLanguage = propLanguage || context.currentLanguage || 'en';
+  const [selectedTask, setSelectedTask] = React.useState(null);
   return (
     <div className="space-y-6">
       <FarmMetrics currentLanguage={currentLanguage} />

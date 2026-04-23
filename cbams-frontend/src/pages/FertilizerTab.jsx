@@ -17,7 +17,12 @@ import {
 } from 'lucide-react';
 import axios from '../utils/axiosConfig';
 
-const FertilizerTab = ({ currentLanguage }) => {
+import { useOutletContext } from 'react-router-dom';
+
+const FertilizerTab = ({ currentLanguage: propLanguage }) => {
+  const context = useOutletContext() || {};
+  const currentLanguage = propLanguage || context.currentLanguage || 'en';
+
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);

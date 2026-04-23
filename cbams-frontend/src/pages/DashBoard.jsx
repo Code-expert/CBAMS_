@@ -1,80 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Outlet, useLocation } from 'react-router-dom';
 
 // Import components
 import Header from '../componenets/Header';
 import Sidebar from '../componenets/Layouts/Sidebar';
-import OverviewTab from '../componenets/Dashboard/OverviewTab';
-import AnalyticsTab from './AnalyticsTab';
-import TasksTab from './TasksTab';
-import MarketplaceTab from './MarketplaceTab';
-import ChatbotTab from './ChatBot';
-import WeatherForecast from '../componenets/Dashboard/WeatherForecast';
-import ExpertConsultationPage from './Session';
-import Community from '../componenets/Dashboard/Community';
-import Settings from './Setting';
-import FertilizerTab from './FertilizerTab';
 
 const Dashboard = () => {
-  const [activeTab, setActiveTab] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentLanguage, setCurrentLanguage] = useState('en');
-  const [selectedTask, setSelectedTask] = useState(null);
+  const location = useLocation();
 
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 'overview':
-        return (
-          <OverviewTab 
-            currentLanguage={currentLanguage} 
-            selectedTask={selectedTask} 
-            setSelectedTask={setSelectedTask} 
-          />
-        );
-      case 'analytics':
-        return <AnalyticsTab currentLanguage={currentLanguage} />;
-      case 'fertilizer':
-        return <FertilizerTab currentLanguage={currentLanguage} />;
-      case 'tasks':
-        return <TasksTab currentLanguage={currentLanguage} />;
-      case 'marketplace':
-        return <MarketplaceTab currentLanguage={currentLanguage} />;
-      case 'chatbot':
-        return <ChatbotTab currentLanguage={currentLanguage} />;
-      case 'session':
-        return <ExpertConsultationPage currentLanguage={currentLanguage} />;  
-      case 'weather':
-        return (
-          <div className="space-y-6">
-            <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Weather Dashboard</h2>
-            <WeatherForecast currentLanguage={currentLanguage} />
-          </div>
-        );
-      case 'community':
-        return (
-          <div className="space-y-6">
-            <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Community Hub</h2>
-            <Community currentLanguage={currentLanguage} />
-          </div>
-        );
-
-      case 'settings':
-        return (
-          <div className="space-y-6">
-            <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Settings</h2>
-            <Settings currentLanguage={currentLanguage} setCurrentLanguage={setCurrentLanguage} />
-          </div>
-        );
-      default:
-        return (
-          <OverviewTab 
-            currentLanguage={currentLanguage} 
-            selectedTask={selectedTask} 
-            setSelectedTask={setSelectedTask} 
-          />
-        );
-    }
-  };
+  // Extract active tab from pathname for Sidebar highlighting
+  const activeTab = location.pathname.split('/').pop() || 'overview';
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-slate-50 selection:bg-emerald-100">
@@ -96,8 +34,7 @@ const Dashboard = () => {
         <div className="flex">
           <Sidebar 
             sidebarOpen={sidebarOpen} 
-            activeTab={activeTab} 
-            setActiveTab={setActiveTab}
+            activeTab={activeTab === 'dashboard' ? 'overview' : activeTab} 
             currentLanguage={currentLanguage}
           />
 
@@ -105,13 +42,13 @@ const Dashboard = () => {
           <main className={`flex-1 transition-all duration-300 ease-in-out px-4 py-8 md:px-8 max-w-[1600px] mx-auto`}>
             <AnimatePresence mode="wait">
               <motion.div
-                key={activeTab}
+                key={location.pathname}
                 initial={{ opacity: 0, y: 15, scale: 0.99 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -15, scale: 1.01 }}
                 transition={{ duration: 0.4, ease: "easeOut" }}
               >
-                {renderTabContent()}
+                <Outlet context={{ currentLanguage, setCurrentLanguage }} />
               </motion.div>
             </AnimatePresence>
           </main>

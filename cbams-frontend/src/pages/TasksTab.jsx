@@ -17,7 +17,12 @@ import {
 import { translations } from '../constants/languages';
 import taskService from '../services/taskService';
 
-const TasksTab = ({ currentLanguage = 'en' }) => {
+import { useOutletContext } from 'react-router-dom';
+
+const TasksTab = ({ currentLanguage: propLanguage }) => {
+  const context = useOutletContext() || {};
+  const currentLanguage = propLanguage || context.currentLanguage || 'en';
+
   const t = (key) => translations[currentLanguage]?.[key] || translations.en[key];
 
   const [tasks, setTasks] = useState([]);

@@ -17,6 +17,11 @@ import ExpertConsultationPage from './pages/Session.jsx'
 import ExpertDashboard from './pages/ExpertDashboard.jsx'
 import VideoCall from './pages/VideoCall.jsx'
 import Settings from './pages/Setting.jsx'
+import OverviewTab from './componenets/Dashboard/OverviewTab'
+import FertilizerTab from './pages/FertilizerTab'
+import ChatbotTab from './pages/ChatBot'
+import WeatherForecast from './componenets/Dashboard/WeatherForecast'
+import Community from './componenets/Dashboard/Community'
 
 const appRouter = createBrowserRouter([
   {
@@ -55,8 +60,43 @@ const appRouter = createBrowserRouter([
             <Dashboard />
           </ProtectedRoute>
         ),
+        children: [
+          { index: true, element: <OverviewTab /> },
+          { path: 'analytics', element: <AnalyticsTab /> },
+          { path: 'tasks', element: <TasksTab /> },
+          { path: 'marketplace', element: <MarketplaceTab /> },
+          { path: 'chatbot', element: <ChatbotTab /> },
+          { path: 'session', element: <ExpertConsultationPage /> },
+          { 
+            path: 'weather', 
+            element: (
+              <div className="space-y-6">
+                <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Weather Dashboard</h2>
+                <WeatherForecast />
+              </div>
+            ) 
+          },
+          { 
+            path: 'community', 
+            element: (
+              <div className="space-y-6">
+                <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Community Hub</h2>
+                <Community />
+              </div>
+            ) 
+          },
+          { 
+            path: 'settings', 
+            element: (
+              <div className="space-y-6">
+                <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Settings</h2>
+                <Settings />
+              </div>
+            ) 
+          },
+        ]
       },
-      // Add more protected routes here
+      // Keep root-level redirects if needed or remove duplicates
       {
         path: '/marketplace',
         element: (

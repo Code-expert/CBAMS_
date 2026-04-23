@@ -25,7 +25,12 @@ import {
 import { geminiService } from '../services/geminiService';
 import { translations as globalTranslations } from '../constants/languages';
 
-const ChatbotTab = ({ currentLanguage = 'en' }) => {
+import { useOutletContext } from 'react-router-dom';
+
+const ChatbotTab = ({ currentLanguage: propLanguage }) => {
+  const context = useOutletContext() || {};
+  const currentLanguage = propLanguage || context.currentLanguage || 'en';
+
   const markdownStyles = `
     .markdown-content h1, .markdown-content h2, .markdown-content h3 { font-weight: bold; margin-top: 0.8rem; margin-bottom: 0.4rem; color: #1f2937; }
     .markdown-content h1 { font-size: 1.1rem; }
