@@ -17,7 +17,6 @@ import ExpertConsultationPage from './pages/Session.jsx'
 import ExpertDashboard from './pages/ExpertDashboard.jsx'
 import VideoCall from './pages/VideoCall.jsx'
 import Settings from './pages/Setting.jsx'
-import Playground from './pages/Playground.jsx'
 
 const appRouter = createBrowserRouter([
   {
@@ -103,14 +102,6 @@ const appRouter = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Settings />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/playground',
-        element: (
-          <ProtectedRoute>
-            <Playground />
           </ProtectedRoute>
         ),
       },
