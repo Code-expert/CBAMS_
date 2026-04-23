@@ -35,8 +35,9 @@ export const bookSession = async (req, res) => {
     }
 
     // Ensure only FARMER can book
-    if (req.user.role !== "FARMER") {
-      console.log('⚠️ Booking failed: User is not a farmer', { role: req.user.role });
+    const userRole = req.user.role?.toUpperCase();
+    if (userRole !== "FARMER") {
+      console.log('⚠️ Booking failed: User is not a farmer', { role: req.user.role, userRole });
       return res.status(403).json({ message: "Only farmers can book sessions" });
     }
 
@@ -96,7 +97,8 @@ export const confirmSession = async (req, res) => {
     const { id } = req.params;
 
     // Ensure only EXPERT can confirm
-    if (req.user.role !== "EXPERT") {
+    const userRole = req.user.role?.toUpperCase();
+    if (userRole !== "EXPERT") {
       return res.status(403).json({ message: "Only experts can confirm sessions" });
     }
 
@@ -146,8 +148,9 @@ export const confirmSession = async (req, res) => {
 // 📅 Farmer views all their sessions
 export const getFarmerSessions = async (req, res) => {
   try {
-    if (req.user.role !== "FARMER") {
-      return res.status(403).json({ message: "Only farmers can access this" });
+    const userRole = req.user.role?.toUpperCase();
+    if (userRole !== "FARMER") {
+      return res.status(403).json({ message: `Access denied. ${req.user.role} is not a FARMER.` });
     }
 
     const sessions = await prisma.session.findMany({
