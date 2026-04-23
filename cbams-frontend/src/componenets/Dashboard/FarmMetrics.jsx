@@ -107,28 +107,44 @@ const FarmMetrics = ({ currentLanguage }) => {
             key={metric.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className={`${metric.bgColor} rounded-xl p-6 hover:shadow-lg transition-all cursor-pointer border border-white/50`}
+            whileHover={{ y: -5, scale: 1.02 }}
+            transition={{ delay: index * 0.1, duration: 0.3 }}
+            className={`glass-card rounded-2xl p-6 transition-all cursor-pointer group relative overflow-hidden`}
           >
-            <div className="flex items-center justify-between mb-4">
-              <div className={`w-12 h-12 bg-gradient-to-r ${metric.color} rounded-lg flex items-center justify-center shadow-sm`}>
+            {/* Background Accent Glow */}
+            <div className={`absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br ${metric.color} opacity-10 rounded-full blur-2xl group-hover:opacity-20 transition-opacity`} />
+            
+            <div className="flex items-center justify-between mb-5 relative z-10">
+              <div className={`w-14 h-14 bg-gradient-to-r ${metric.color} rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20 transform group-hover:rotate-6 transition-transform`}>
                 {loading && (metric.id === 'moisture' || metric.id === 'temp') ? (
-                  <Loader className="w-6 h-6 text-white animate-spin" />
+                  <Loader className="w-7 h-7 text-white animate-spin" />
                 ) : (
-                  <Icon className="w-6 h-6 text-white" />
+                  <Icon className="w-7 h-7 text-white" />
                 )}
               </div>
               {metric.trend && (
-                <span className={`text-sm font-semibold ${metric.trend.startsWith('+') ? 'text-green-600' : 'text-red-500'}`}>
-                  {metric.trend}
-                </span>
+                <div className={`flex items-center px-2 py-1 rounded-full text-xs font-bold ${metric.trend.startsWith('+') ? 'bg-green-100/80 text-green-700' : 'bg-red-100/80 text-red-700'}`}>
+                   {metric.trend}
+                </div>
               )}
             </div>
-            <h3 className="text-2xl font-bold text-gray-800 mb-1">{metric.value}</h3>
-            <p className="text-sm text-gray-600">{metric.label}</p>
-            {loading && (metric.id === 'moisture' || metric.id === 'temp') && (
-              <p className="text-xs text-gray-400 mt-2">Fetching live data...</p>
-            )}
+            
+            <div className="relative z-10">
+              <p className="text-sm font-semibold text-slate-500 mb-1 tracking-wide uppercase">{metric.label}</p>
+              <h3 className="text-3xl font-black text-slate-900 tracking-tight">{metric.value}</h3>
+              
+              {loading && (metric.id === 'moisture' || metric.id === 'temp') && (
+                <div className="flex items-center gap-2 mt-3">
+                  <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                    <motion.div 
+                      className={`h-full bg-gradient-to-r ${metric.color}`}
+                      animate={{ x: [-100, 200] }}
+                      transition={{ repeat: Infinity, duration: 1.5 }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
           </motion.div>
         );
       })}

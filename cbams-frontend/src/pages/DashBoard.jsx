@@ -13,6 +13,7 @@ import WeatherForecast from '../componenets/Dashboard/WeatherForecast';
 import ExpertConsultationPage from './Session';
 import Community from '../componenets/Dashboard/Community';
 import Settings from './Setting';
+import Playground from './Playground';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -43,22 +44,24 @@ const Dashboard = () => {
       case 'weather':
         return (
           <div className="space-y-6">
-            <h2 className="text-3xl font-bold text-gray-800">Weather Dashboard</h2>
+            <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Weather Dashboard</h2>
             <WeatherForecast currentLanguage={currentLanguage} />
           </div>
         );
       case 'community':
         return (
           <div className="space-y-6">
-            <h2 className="text-3xl font-bold text-gray-800">Community Hub</h2>
+            <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Community Hub</h2>
             <Community currentLanguage={currentLanguage} />
           </div>
         );
+      case 'playground':
+        return <Playground />;
       case 'settings':
         return (
           <div className="space-y-6">
-            <h2 className="text-3xl font-bold text-gray-800">Settings</h2>
-            <Settings currentLanguage={currentLanguage} />
+            <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Settings</h2>
+            <Settings currentLanguage={currentLanguage} setCurrentLanguage={setCurrentLanguage} />
           </div>
         );
       default:
@@ -73,37 +76,77 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
-<Header 
-        sidebarOpen={sidebarOpen} 
-        setSidebarOpen={setSidebarOpen}
-        currentLanguage={currentLanguage}
-        setCurrentLanguage={setCurrentLanguage}
-      />
+    <div className="min-h-screen relative overflow-hidden bg-slate-50 selection:bg-emerald-100">
+      {/* Premium Animated Background Blobs */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-100/40 blur-[120px] animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-blue-100/30 blur-[100px] animate-pulse delay-700" />
+        <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] rounded-full bg-green-100/20 blur-[80px] animate-pulse delay-1000" />
+      </div>
 
-      <div className="flex">
-        <Sidebar 
+      <div className="relative z-10">
+        <Header 
           sidebarOpen={sidebarOpen} 
-          activeTab={activeTab} 
-          setActiveTab={setActiveTab}
+          setSidebarOpen={setSidebarOpen}
           currentLanguage={currentLanguage}
+          setCurrentLanguage={setCurrentLanguage}
         />
 
-        {/* Main Content */}
-        <div className="flex-1 p-6 overflow-auto">
-                <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              {renderTabContent()}
-            </motion.div>
-          </AnimatePresence>
+        <div className="flex">
+          <Sidebar 
+            sidebarOpen={sidebarOpen} 
+            activeTab={activeTab} 
+            setActiveTab={setActiveTab}
+            currentLanguage={currentLanguage}
+          />
+
+          {/* Main Content Area with Modern Shadow Box */}
+          <main className={`flex-1 transition-all duration-300 ease-in-out px-4 py-8 md:px-8 max-w-[1600px] mx-auto`}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 15, scale: 0.99 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -15, scale: 1.01 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+              >
+                {renderTabContent()}
+              </motion.div>
+            </AnimatePresence>
+          </main>
         </div>
       </div>
+
+      {/* Global CSS for Custom Scrollbar and Glass Effects */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        ::-webkit-scrollbar {
+          width: 6px;
+          height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8;
+        }
+        .glass-card {
+          background: rgba(255, 255, 255, 0.7);
+          backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.6);
+          box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+        }
+        .animate-float {
+          animation: float 4s ease-in-out infinite;
+        }
+      `}} />
     </div>
   );
 };

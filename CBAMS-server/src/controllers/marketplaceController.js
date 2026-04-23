@@ -32,6 +32,25 @@ export const getAllListings = async (req, res) => {
   }
 };
 
+export const getAllFertilizers = async (req, res) => {
+  try {
+    const fertilizers = await prisma.fertilizer.findMany({
+      include: {
+        shop: {
+          select: { id: true, name: true, ownerId: true }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    
+    console.log('✅ GET ALL FERTILIZERS:', fertilizers.length);
+    res.json(fertilizers);
+  } catch (error) {
+    console.error('❌ GET FERTILIZERS ERROR:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export const createListing = async (req, res) => {
   try {
     const { productName, category, quantity, unit, pricePerUnit, description, location, imageUrl } = req.body;
@@ -244,10 +263,47 @@ export const updateOrderStatus = async (req, res) => {
   }
 };
 
-// GET Mandi Prices (Mock data for now)
 export const getMandiPrices = async (req, res) => {
   try {
-    // Mock data - in production, fetch from real API
+    const { state, commodity } = req.query;
+    const apiKey = process.env.DATA_GOV_API_KEY;
+
+    // If API key is configured, fetch live data from Government Data Portal (APMC)
+    if (apiKey) {
+      let url = `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${apiKey}&format=json&limit=50`;
+      
+      if (state) url += `&filters[state.keyword]=${encodeURIComponent(state)}`;
+      if (commodity) url += `&filters[commodity.keyword]=${encodeURIComponent(commodity)}`;
+
+      const apiResponse = await fetch(url);
+      const data = await apiResponse.json();
+
+      if (data && data.records && data.records.length > 0) {
+        const livePrices = data.records.map((record) => ({
+          commodity: record.commodity || 'Unknown',
+          variety: record.variety || 'Standard',
+          market: record.market || 'Local Mandi',
+          district: record.district || '',
+          state: record.state || '',
+          arrivalDate: record.arrival_date || new Date().toLocaleDateString(),
+          minPrice: parseFloat(record.min_price) || 0,
+          maxPrice: parseFloat(record.max_price) || 0,
+          modalPrice: parseFloat(record.modal_price) || 0,
+          priceUnit: 'quintal',
+          trend: 'stable',
+          change: '0.0'
+        }));
+        
+        console.log(`✅ FETCHED ${livePrices.length} LIVE MANDI PRICES`);
+        return res.json(livePrices);
+      } else {
+        console.warn('⚠️ No live APMC records found for filters, falling back to mock...');
+      }
+    } else {
+      console.warn('⚠️ DATA_GOV_API_KEY not found in .env. Falling back to mock Mandi data.');
+    }
+
+    // Mock data fallback if API key missing or endpoint returns empty
     const mockPrices = [
       {
         commodity: 'Wheat',
@@ -293,7 +349,15 @@ export const getMandiPrices = async (req, res) => {
       }
     ];
     
-    res.json(mockPrices);
+    // Simple filter logic for mock data
+    const filteredMock = mockPrices.filter(item => {
+      let matches = true;
+      if (state && item.state.toLowerCase() !== state.toLowerCase()) matches = false;
+      if (commodity && item.commodity.toLowerCase() !== commodity.toLowerCase()) matches = false;
+      return matches;
+    });
+
+    res.json(filteredMock);
   } catch (error) {
     console.error('❌ GET MANDI PRICES ERROR:', error);
     res.status(500).json({ error: error.message });

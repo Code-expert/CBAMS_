@@ -5,6 +5,7 @@ import { Menu, X, ChevronDown, Leaf, User, Settings, LogOut, Bell, MessageCircle
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../redux/slices/authSlice.js';
+import { languages as allLanguages } from '../../constants/languages.js';
 
 const Navbar = () => {
   const { t, i18n } = useTranslation();
@@ -78,13 +79,7 @@ const Navbar = () => {
 
   const navItems = getNavItems();
 
-  const languages = [
-    { code: "en", label: "English", flag: "🇺🇸" },
-    { code: "hi", label: "हिंदी", flag: "🇮🇳" },
-    { code: "bn", label: "বাংলা", flag: "🇧🇩" },
-    { code: "te", label: "తెలుగు", flag: "🇮🇳" }
-  ];
-  const currentLanguage = languages.find(lang => lang.code === i18n.language) || languages[0];
+  const currentLanguage = allLanguages.find(lang => lang.code === i18n.language) || allLanguages[0];
 
   const handleProfileAction = (item) => {
     if (item.isAction && item.label.toLowerCase().includes('logout')) {
@@ -294,7 +289,7 @@ const Navbar = () => {
                   exit={{ opacity: 0, scale: 0.95, y: -10 }}
                   className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50"
                 >
-                  {languages.map((lang) => (
+                  {allLanguages.map((lang) => (
                     <button
                       key={lang.code}
                       onClick={() => {
@@ -306,7 +301,7 @@ const Navbar = () => {
                       }`}
                     >
                       <span className="text-lg">{lang.flag}</span>
-                      <span className="font-medium">{lang.label}</span>
+                      <span className="font-medium">{lang.name}</span>
                     </button>
                   ))}
                 </motion.div>

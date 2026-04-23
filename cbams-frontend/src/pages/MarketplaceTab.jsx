@@ -24,11 +24,10 @@ import {
 } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import axios from '../utils/axiosConfig';
-import { translations } from '../constants/languages';
-
+import { useTranslation } from 'react-i18next';
 
 const MarketplaceTab = ({ currentLanguage }) => {
-  const t = (key) => translations[currentLanguage]?.[key] || translations.en[key];
+  const { t } = useTranslation();
   const { user } = useSelector((state) => state.auth);
   
   const [marketType, setMarketType] = useState('produce');
@@ -176,7 +175,7 @@ const MarketplaceTab = ({ currentLanguage }) => {
   const fetchFertilizers = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/seller/fertilizers');
+      const response = await axios.get('/marketplace/fertilizers');
       setFertilizers(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Error:', error);
@@ -326,8 +325,8 @@ const MarketplaceTab = ({ currentLanguage }) => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-4xl font-black text-gray-900">{t('marketplace')}</h2>
-          <p className="text-gray-600 mt-2">Buy and sell agricultural products</p>
+          <h2 className="text-4xl font-black text-gray-900">{t("Marketplace") || "Marketplace"}</h2>
+          <p className="text-gray-600 mt-2">{t("Buy and sell agricultural products") || "Buy and sell agricultural products"}</p>
         </div>
         
         {user?.role === 'FARMER' && activeTab === 'myListings' && (
@@ -353,7 +352,7 @@ const MarketplaceTab = ({ currentLanguage }) => {
           }`}
         >
           <Sprout className="w-5 h-5" />
-          Farm Produce
+          {t("Farm Produce") || "Farm Produce"}
         </button>
         <button
           onClick={() => setMarketType('fertilizers')}
@@ -364,7 +363,7 @@ const MarketplaceTab = ({ currentLanguage }) => {
           }`}
         >
           <Leaf className="w-5 h-5" />
-          Fertilizers
+          {t("Fertilizers") || "Fertilizers"}
         </button>
       </div>
 

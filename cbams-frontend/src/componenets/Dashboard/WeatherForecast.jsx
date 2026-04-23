@@ -115,7 +115,7 @@ const WeatherForecast = ({ currentLanguage }) => {
       >
         <div className="flex items-center justify-center gap-3">
           <Loader className="w-6 h-6 text-blue-600 animate-spin" />
-          <p className="text-gray-600">Loading weather data...</p>
+          <p className="text-gray-600">{t('loadingWeather')}</p>
         </div>
       </motion.div>
     );
@@ -153,9 +153,9 @@ const WeatherForecast = ({ currentLanguage }) => {
       <div className="relative z-10">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-2xl font-bold mb-1">{location.city}</h3>
+            <h3 className="text-2xl font-bold mb-1">{location.city === 'Your Location' ? t('yourLocation') : location.city}</h3>
             <p className="text-blue-100 text-sm">
-              {new Date().toLocaleDateString('en-US', { 
+              {new Date().toLocaleDateString(currentLanguage, { 
                 weekday: 'long', 
                 year: 'numeric', 
                 month: 'long', 
@@ -176,7 +176,7 @@ const WeatherForecast = ({ currentLanguage }) => {
             {getWeatherDescription(weather.current.weather_code)}
           </p>
           <p className="text-sm text-blue-200 mt-1">
-            Feels like {feelsLike}°C
+            {t('feelsLike')} {feelsLike}°C
           </p>
         </div>
 
@@ -185,14 +185,14 @@ const WeatherForecast = ({ currentLanguage }) => {
           <div className="bg-white rounded-xl p-4 shadow-md">
             <div className="flex items-center gap-2 mb-2">
               <Droplets className="w-5 h-5 text-blue-600" />
-              <span className="text-sm font-medium text-gray-700">Humidity</span>
+              <span className="text-sm font-medium text-gray-700">{t('humidity')}</span>
             </div>
             <p className="text-3xl font-bold text-gray-900">{humidity}%</p>
           </div>
           <div className="bg-white rounded-xl p-4 shadow-md">
             <div className="flex items-center gap-2 mb-2">
               <Wind className="w-5 h-5 text-blue-600" />
-              <span className="text-sm font-medium text-gray-700">Wind Speed</span>
+              <span className="text-sm font-medium text-gray-700">{t('windSpeed')}</span>
             </div>
             <p className="text-3xl font-bold text-gray-900">{windSpeed} km/h</p>
           </div>
@@ -213,7 +213,7 @@ const WeatherForecast = ({ currentLanguage }) => {
                 className="bg-white rounded-xl p-4 text-center shadow-md"
               >
                 <p className="text-sm font-semibold text-gray-700 mb-2">
-                  {date.toLocaleDateString('en-US', { weekday: 'short' })}
+                  {date.toLocaleDateString(currentLanguage, { weekday: 'short' })}
                 </p>
                 <ForecastIcon className="w-8 h-8 mx-auto mb-2 text-yellow-500" />
                 <div className="flex items-center justify-center gap-2 text-base">

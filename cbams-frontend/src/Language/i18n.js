@@ -1,18 +1,18 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
+import { translations } from "../constants/languages";
 
-import en from "../locales/en/translation.json";
-import hi from "../locales/hi/translation.json";
+const resources = {};
+Object.keys(translations).forEach((lang) => {
+  resources[lang] = { translation: translations[lang] };
+});
 
 i18n
   .use(LanguageDetector) // auto-detect browser language
   .use(initReactI18next)
   .init({
-    resources: {
-      en: { translation: en },
-      hi: { translation: hi }
-    },
+    resources,
     fallbackLng: "en",
     interpolation: { escapeValue: false }
   });

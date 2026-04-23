@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { 
   Users, 
   MessageCircle, 
@@ -20,9 +21,10 @@ import {
   Droplet,
   Sun
 } from 'lucide-react';
-import axios from 'axios';
+import axios from '../../utils/axiosConfig';
 
 const Community = () => {
+  const { t } = useTranslation();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newPost, setNewPost] = useState('');
@@ -33,7 +35,7 @@ const Community = () => {
   // Mock data - Replace with real API calls
   const mockPosts = [
     {
-      id: 1,
+      id: 'mock-1',
       author: {
         name: 'Rajesh Kumar',
         avatar: '👨‍🌾',
@@ -50,7 +52,7 @@ const Community = () => {
       tags: ['wheat', 'organic', 'harvest']
     },
     {
-      id: 2,
+      id: 'mock-2',
       author: {
         name: 'Priya Sharma',
         avatar: '👩‍🌾',
@@ -67,7 +69,7 @@ const Community = () => {
       tags: ['tomato', 'pest-control', 'advice']
     },
     {
-      id: 3,
+      id: 'mock-3',
       author: {
         name: 'Amit Patel',
         avatar: '🧑‍🌾',
@@ -103,43 +105,76 @@ const Community = () => {
   ];
 
   useEffect(() => {
-    // Simulate loading posts
-    setTimeout(() => {
-      setPosts(mockPosts);
-      setLoading(false);
-    }, 1000);
+    fetchPosts();
   }, []);
 
-  const handleLike = (postId) => {
+  const fetchPosts = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get('/community');
+      if (res.data && res.data.length > 0) {
+        setPosts(res.data);
+      } else {
+        setPosts(mockPosts);
+      }
+    } catch (err) {
+      console.error('Error fetching posts:', err);
+      // Fallback to mock if API fails
+      setPosts(mockPosts);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLike = async (postId) => {
+    // Optimistically update UI
     setPosts(posts.map(post => 
       post.id === postId 
         ? { ...post, likes: post.likes + 1 }
         : post
     ));
+    try {
+      if (typeof postId !== 'string' || !postId.startsWith('mock-')) {
+        await axios.post(`/community/${postId}/like`);
+      }
+    } catch (err) {
+      console.error('Failed to like post:', err);
+    }
   };
 
-  const handleCreatePost = () => {
+  const handleComment = (postId) => {
+    setPosts(posts.map(post => 
+      post.id === postId 
+        ? { ...post, comments: post.comments + 1 }
+        : post
+    ));
+  };
+
+  const handleShare = (postId) => {
+    setPosts(posts.map(post => 
+      post.id === postId 
+        ? { ...post, shares: post.shares + 1 }
+        : post
+    ));
+  };
+
+  const handleCreatePost = async () => {
     if (newPost.trim()) {
-      const post = {
-        id: posts.length + 1,
-        author: {
-          name: 'You',
-          avatar: '👤',
-          location: 'Your Location',
-          verified: false
-        },
-        content: newPost,
-        image: null,
-        timestamp: 'Just now',
-        likes: 0,
-        comments: 0,
-        shares: 0,
-        category: 'General',
-        tags: []
-      };
-      setPosts([post, ...posts]);
-      setNewPost('');
-      setShowNewPost(false);
+      try {
+        const payload = {
+          content: newPost,
+          category: 'General',
+          tags: [],
+          imageUrl: null
+        };
+        const res = await axios.post('/community', payload);
+        setPosts([res.data, ...posts]);
+        setNewPost('');
+        setShowNewPost(false);
+      } catch (err) {
+        console.error('Failed to create post:', err);
+        alert('Failed to post. Are you logged in?');
+      }
     }
   };
 
@@ -159,7 +194,7 @@ const Community = () => {
       <div className="flex items-center justify-center h-screen bg-gradient-to-br from-green-50 to-blue-50">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-green-600 mb-4"></div>
-          <p className="text-gray-600 text-lg">Loading community...</p>
+          <p className="text-gray-600 text-lg">{t("Loading community...") || "Loading community..."}</p>
         </div>
       </div>
     );
@@ -178,26 +213,26 @@ const Community = () => {
             <div>
               <h1 className="text-4xl font-bold text-gray-800 flex items-center gap-3">
                 <Users className="w-10 h-10 text-green-600" />
-                Farmer Community
+                {t("Farmer Community") || "Farmer Community"}
               </h1>
-              <p className="text-gray-600 mt-2">Connect, learn, and grow together</p>
+              <p className="text-gray-600 mt-2">{t("Connect, learn, and grow together") || "Connect, learn, and grow together"}</p>
             </div>
             <button
               onClick={() => setShowNewPost(!showNewPost)}
               className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:shadow-lg transform hover:scale-105 transition-all"
             >
               <Plus className="w-5 h-5" />
-              New Post
+              {t("New Post") || "New Post"}
             </button>
           </div>
 
           {/* Stats Bar */}
           <div className="grid grid-cols-4 gap-4 mb-6">
             {[
-              { icon: Users, label: 'Members', value: '12.5K', color: 'blue' },
-              { icon: MessageCircle, label: 'Posts Today', value: '234', color: 'green' },
-              { icon: TrendingUp, label: 'Trending', value: '45', color: 'purple' },
-              { icon: Award, label: 'Experts', value: '89', color: 'yellow' }
+              { icon: Users, label: t('Members') || 'Members', value: '12.5K', color: 'blue' },
+              { icon: MessageCircle, label: t('Posts Today') || 'Posts Today', value: '234', color: 'green' },
+              { icon: TrendingUp, label: t('Trending') || 'Trending', value: '45', color: 'purple' },
+              { icon: Award, label: t('Experts') || 'Experts', value: '89', color: 'yellow' }
             ].map((stat, index) => (
               <motion.div
                 key={index}
@@ -259,11 +294,11 @@ const Community = () => {
               className="mb-6 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden"
             >
               <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-800 mb-4">Create a Post</h3>
+                <h3 className="text-xl font-bold text-gray-800 mb-4">{t("Create a Post") || "Create a Post"}</h3>
                 <textarea
                   value={newPost}
                   onChange={(e) => setNewPost(e.target.value)}
-                  placeholder="Share your farming experience, ask questions, or give advice..."
+                  placeholder={t("Share your farming experience, ask questions, or give advice...") || "Share your farming experience, ask questions, or give advice..."}
                   className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-green-500 h-32"
                 />
                 <div className="flex items-center justify-between mt-4">
@@ -357,11 +392,11 @@ const Community = () => {
                     <Heart className="w-5 h-5 text-gray-600 group-hover:text-red-500 group-hover:fill-red-500 transition-all" />
                     <span className="text-gray-700 font-medium">{post.likes}</span>
                   </button>
-                  <button className="flex items-center gap-2 px-4 py-2 hover:bg-white rounded-lg transition-all group">
+                  <button onClick={() => handleComment(post.id)} className="flex items-center gap-2 px-4 py-2 hover:bg-white rounded-lg transition-all group">
                     <MessageCircle className="w-5 h-5 text-gray-600 group-hover:text-blue-500 transition-colors" />
                     <span className="text-gray-700 font-medium">{post.comments}</span>
                   </button>
-                  <button className="flex items-center gap-2 px-4 py-2 hover:bg-white rounded-lg transition-all group">
+                  <button onClick={() => handleShare(post.id)} className="flex items-center gap-2 px-4 py-2 hover:bg-white rounded-lg transition-all group">
                     <Share2 className="w-5 h-5 text-gray-600 group-hover:text-green-500 transition-colors" />
                     <span className="text-gray-700 font-medium">{post.shares}</span>
                   </button>

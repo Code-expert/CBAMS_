@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { translations } from '../../constants/languages';
 import axios from '../../utils/axiosConfig';
+import { cropService } from '../../services/cropService';
 
 const TasksPanel = ({ currentLanguage, selectedTask, setSelectedTask }) => {
   const t = (key) => translations[currentLanguage]?.[key] || translations.en[key];
@@ -61,14 +62,17 @@ const TasksPanel = ({ currentLanguage, selectedTask, setSelectedTask }) => {
       setLoading(true);
       setError(null);
 
-      // Fetch all tasks
-      const response = await axios.get('/tasks');
+      // Fetch tasks using service
+      const response = await cropService.getTasks();
       
       // Filter for today's tasks
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       
-      const todaysTasks = response.data.filter(task => {
+      // Fix: cropService.getTasks() may return the array directly or an object with a data property
+      const tasksData = Array.isArray(response) ? response : (response?.data || []);
+      
+      const todaysTasks = tasksData.filter(task => {
         const taskDate = new Date(task.dueDate);
         taskDate.setHours(0, 0, 0, 0);
         return taskDate.getTime() === today.getTime();
@@ -185,127 +189,105 @@ const TasksPanel = ({ currentLanguage, selectedTask, setSelectedTask }) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-xl p-6 shadow-lg border border-green-100"
+      className="glass-card rounded-3xl p-8"
     >
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-          <Calendar className="w-6 h-6 text-green-600" />
+      <div className="flex items-center justify-between mb-8">
+        <h3 className="text-2xl font-black text-slate-900 flex items-center gap-3 tracking-tight">
+          <div className="p-2 bg-emerald-100 rounded-xl">
+            <Calendar className="w-6 h-6 text-emerald-600" />
+          </div>
           {t('todaysTasks')}
         </h3>
-        <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-bold">
-          {tasks.length} {tasks.length === 1 ? 'Task' : 'Tasks'}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-black uppercase tracking-wider">
+            {tasks.length} {tasks.length === 1 ? 'Task' : 'Tasks'}
+          </span>
+          <button 
+            onClick={fetchTodaysTasks}
+            className="p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-400 hover:text-emerald-600"
+          >
+             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
+        </div>
       </div>
 
-      <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
-        {tasks.map((task) => {
+      <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+        {tasks.map((task, index) => {
           const Icon = getTaskIcon(task.category);
           const isCompleted = task.status === 'COMPLETED';
           
           return (
             <motion.div
               key={task.id}
-              initial={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
-              className={`flex items-center gap-4 p-4 rounded-lg border transition-all cursor-pointer hover:shadow-md ${
+              transition={{ delay: index * 0.05 }}
+              whileHover={{ x: 5 }}
+              className={`group flex items-center gap-4 p-5 rounded-2xl border transition-all cursor-pointer ${
                 isCompleted
-                  ? 'bg-green-50 border-green-200' 
-                  : 'bg-gray-50 border-gray-200 hover:border-green-200'
+                  ? 'bg-emerald-50/50 border-emerald-100 opacity-75' 
+                  : 'bg-white border-slate-100 hover:border-emerald-200 hover:shadow-xl hover:shadow-emerald-500/5'
               }`}
               onClick={() => setSelectedTask(task)}
             >
-              {/* Checkbox to mark complete */}
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   handleToggleComplete(task.id, task.status);
                 }}
-                className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-                  isCompleted ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-400 hover:bg-gray-500'
+                className={`flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 ${
+                  isCompleted 
+                    ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' 
+                    : 'bg-slate-50 text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-500 border border-slate-100 group-hover:border-emerald-100'
                 }`}
               >
-                {isCompleted ? (
-                  <CheckCircle className="w-5 h-5 text-white" />
-                ) : (
-                  <Icon className="w-5 h-5 text-white" />
-                )}
+                {isCompleted ? <CheckCircle className="w-6 h-6" /> : <Icon className="w-6 h-6" />}
               </button>
 
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-1">
-                  <h4 className={`font-semibold ${
-                    isCompleted ? 'text-green-800 line-through' : 'text-gray-800'
+                  <h4 className={`text-sm font-black tracking-tight ${
+                    isCompleted ? 'text-emerald-900/40 line-through' : 'text-slate-800'
                   }`}>
                     {task.title}
                   </h4>
-                  <span className={`px-2 py-1 text-xs rounded-full ${getPriorityColor(task.priority)}`}>
+                  <span className={`px-2 py-0.5 text-[10px] font-black uppercase tracking-tighter rounded-lg ${getPriorityColor(task.priority)}`}>
                     {task.priority}
                   </span>
                 </div>
 
-                <div className="flex items-center gap-4 text-sm text-gray-600">
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
+                <div className="flex items-center gap-4 text-[11px] font-bold text-slate-500">
+                  <div className="flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-slate-400" />
                     <span>{formatTime(task.dueDate)}</span>
                   </div>
                   
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-600 rounded-full">
-                      {task.category}
-                    </span>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-1.5 h-1.5 bg-blue-400 rounded-full" />
+                    <span className="uppercase tracking-widest opacity-70">{task.category}</span>
                   </div>
-
-                  {isCompleted && (
-                    <div className="ml-auto">
-                      <CheckCircle className="w-4 h-4 text-green-500" />
-                    </div>
-                  )}
                 </div>
-
-                {/* Description preview */}
-                {task.description && (
-                  <p className="text-xs text-gray-500 mt-1 line-clamp-1">
-                    {task.description}
-                  </p>
-                )}
               </div>
             </motion.div>
           );
         })}
       </div>
 
-      {/* Summary Footer */}
-      <div className="mt-4 pt-4 border-t-2 border-gray-100 grid grid-cols-3 gap-4">
-        <div className="text-center">
-          <p className="text-2xl font-black text-green-600">
-            {tasks.filter(t => t.status === 'COMPLETED').length}
-          </p>
-          <p className="text-xs text-gray-600">Completed</p>
-        </div>
-        <div className="text-center">
-          <p className="text-2xl font-black text-yellow-600">
-            {tasks.filter(t => t.status === 'PENDING' || t.status === 'IN_PROGRESS').length}
-          </p>
-          <p className="text-xs text-gray-600">Pending</p>
-        </div>
-        <div className="text-center">
-          <p className="text-2xl font-black text-blue-600">
-            {Math.round((tasks.filter(t => t.status === 'COMPLETED').length / tasks.length) * 100)}%
-          </p>
-          <p className="text-xs text-gray-600">Progress</p>
-        </div>
+      {/* Modern Progress Summary */}
+      <div className="mt-8 grid grid-cols-3 gap-4">
+        {[
+          { label: 'Done', val: tasks.filter(t => t.status === 'COMPLETED').length, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+          { label: 'Wait', val: tasks.filter(t => t.status !== 'COMPLETED').length, color: 'text-amber-500', bg: 'bg-amber-50' },
+          { label: 'Goal', val: `${tasks.length > 0 ? Math.round((tasks.filter(t => t.status === 'COMPLETED').length / tasks.length) * 100) : 0}%`, color: 'text-blue-500', bg: 'bg-blue-50' }
+        ].map((stat, i) => (
+          <div key={i} className={`${stat.bg} rounded-2xl p-4 text-center border border-white/50 shadow-sm`}>
+            <p className={`text-xl font-black ${stat.color}`}>{stat.val}</p>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
+          </div>
+        ))}
       </div>
-
-      {/* Refresh Button */}
-      <button
-        onClick={fetchTodaysTasks}
-        className="w-full mt-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-medium hover:shadow-lg transition-all flex items-center justify-center gap-2"
-      >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-        </svg>
-        Refresh Tasks
-      </button>
     </motion.div>
   );
 };

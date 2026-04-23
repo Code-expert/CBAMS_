@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { 
   Leaf, 
   Droplets, 
@@ -22,6 +23,7 @@ import {
 } from 'lucide-react';
 
 const DashboardShowcase = () => {
+  const { t } = useTranslation();
   const [activeView, setActiveView] = useState('desktop');
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -315,16 +317,16 @@ const DashboardShowcase = () => {
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-800 rounded-full mb-6">
             <Monitor className="w-4 h-4" />
-            <span className="text-sm font-semibold">Smart Dashboard</span>
+            <span className="text-sm font-semibold">{t("Smart Dashboard") || "Smart Dashboard"}</span>
           </div>
           
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Your Farm at
-            <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent"> Your Fingertips</span>
+            {t("Your Farm at") || "Your Farm at"}
+            <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent"> {t("Your Fingertips") || "Your Fingertips"}</span>
           </h2>
           
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-8">
-            Experience our intuitive dashboard that puts all your farming data, tasks, and insights in one beautiful, easy-to-use interface.
+            {t("Experience our intuitive dashboard that puts all your farming data, tasks, and insights in one beautiful, easy-to-use interface.") || "Experience our intuitive dashboard that puts all your farming data, tasks, and insights in one beautiful, easy-to-use interface."}
           </p>
 
           {/* View Toggle */}
@@ -336,7 +338,7 @@ const DashboardShowcase = () => {
               }`}
             >
               <Monitor className="w-4 h-4" />
-              <span className="font-medium">Desktop</span>
+              <span className="font-medium">{t("Desktop") || "Desktop"}</span>
             </button>
             <button
               onClick={() => setActiveView('mobile')}
@@ -345,7 +347,7 @@ const DashboardShowcase = () => {
               }`}
             >
               <Smartphone className="w-4 h-4" />
-              <span className="font-medium">Mobile</span>
+              <span className="font-medium">{t("Mobile") || "Mobile"}</span>
             </button>
           </div>
         </motion.div>
@@ -522,8 +524,8 @@ const DashboardShowcase = () => {
           viewport={{ once: true }}
           className="text-center mt-16 p-8 bg-gradient-to-r from-green-600 to-emerald-600 rounded-3xl text-white"
         >
-          <h3 className="text-3xl font-bold mb-4">Ready to Experience Smart Farming?</h3>
-          <p className="text-lg mb-6 opacity-90">Join thousands of farmers who are already using our platform to optimize their operations.</p>
+          <h3 className="text-3xl font-bold mb-4">{t("Ready to Experience Smart Farming?") || "Ready to Experience Smart Farming?"}</h3>
+          <p className="text-lg mb-6 opacity-90">{t("Join thousands of farmers who are already using our platform to optimize their operations.") || "Join thousands of farmers who are already using our platform to optimize their operations."}</p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <motion.button
@@ -532,14 +534,14 @@ const DashboardShowcase = () => {
               className="group inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-green-600 font-semibold rounded-2xl hover:shadow-xl transition-all duration-300"
             >
               <Play className="w-5 h-5" />
-              <span>Watch Live Demo</span>
+              <span>{t("Watch Live Demo") || "Watch Live Demo"}</span>
             </motion.button>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="group inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-white text-white font-semibold rounded-2xl hover:bg-white hover:text-green-600 transition-all duration-300"
             >
-              <span>Start Free Trial</span>
+              <span>{t("Start Free Trial") || "Start Free Trial"}</span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </motion.button>
           </div>

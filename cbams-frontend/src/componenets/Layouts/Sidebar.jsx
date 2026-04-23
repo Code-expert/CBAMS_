@@ -21,7 +21,7 @@ const Sidebar = ({ sidebarOpen, activeTab, setActiveTab, currentLanguage }) => {
     { id: 'analytics', icon: TrendingUp, label: t('analytics') },
     { id: 'tasks', icon: Calendar, label: t('tasks') },
     { id: 'marketplace', icon: ShoppingCart, label: t('marketplace') },
-    { id: 'chatbot', icon: Bot, label: currentLanguage === 'hi' ? 'AI सहायक' : currentLanguage === 'pa' ? 'AI ਸਹਾਇਕ' : 'AI Assistant' },
+    { id: 'chatbot', icon: Bot, label: t('aiAssistant') },
     { id: 'session', icon: Tv, label: t('session') },
     { id: 'weather', icon: Cloud, label: t('weather') },
     { id: 'community', icon: Users, label: t('community') },

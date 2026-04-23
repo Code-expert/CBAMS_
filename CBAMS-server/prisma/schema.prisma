@@ -1,58 +1,19 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-enum Role {
-  FARMER
-  EXPERT
-  ADMIN
-  SELLER
-}
-
-enum OrderStatus {
-  PENDING 
-  ACCEPTED 
-  CANCELLED 
-  SHIPPED 
-  DELIVERED 
-}
-
-enum RepeatType {
-  NONE
-  DAILY
-  WEEKLY
-}
-
-enum SessionStatus {
-  PENDING     
-  CONFIRMED   
-  CANCELLED   
-  COMPLETED   
-}
-
-enum Priority {
-  LOW
-  MEDIUM
-  HIGH
-}
-
-enum TaskStatus {
-  PENDING
-  IN_PROGRESS
-  COMPLETED
-}
-
+// Model Enums replaced with String for SQLite
 model User {
   id        Int        @id @default(autoincrement())
   name      String
   email     String     @unique
   password  String
-  role      Role       @default(FARMER)
+  role      String     @default("FARMER")
   isVerified      Boolean    @default(false)
   otp             String? 
   otpExpiry       DateTime?
@@ -72,6 +33,7 @@ model User {
   cropRecommendations CropRecommendation[] @relation("UserCropRecommendations")
   crops                Crop[]                @relation("FarmerCrops")
   cropAnalysisImages   CropAnalysisImage[]   @relation("FarmerCropImages")
+  communityPosts       CommunityPost[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 }
@@ -111,7 +73,7 @@ model Fertilizer {
   stock         Int
   features      String?
   description   String?
-  subImages     String[] @db.Text
+  subImages     String?
   shop          Shop      @relation(fields: [shopId], references: [id])
   shopId        Int
   orders        Order[]
@@ -127,7 +89,7 @@ model Order {
   fertilizerId Int
   buyer        User        @relation(fields: [buyerId], references: [id])
   buyerId      Int
-  status       OrderStatus @default(PENDING)
+  status       String      @default("PENDING")
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 }
@@ -137,7 +99,7 @@ model Schedule {
   title       String
   description String?
   date        DateTime
-  repeat      RepeatType @default(NONE)
+  repeat      String     @default("NONE")
   user        User       @relation(fields: [userId], references: [id])
   userId      Int
   createdAt   DateTime   @default(now())
@@ -151,10 +113,10 @@ model Session {
   expert     User          @relation("ExpertSessions", fields: [expertId], references: [id])
   expertId   Int
   date       DateTime
-  status     SessionStatus @default(PENDING)   
+  status     String        @default("PENDING")   
   time        String?
-  mode        String?  @default("VIDEO")
-  description String?  @db.Text  
+  mode        String?      @default("VIDEO")
+  description String?    
   videoRoomId String?      @unique
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
@@ -171,8 +133,8 @@ model Task {
   description String?
   time        String     // Format: "HH:MM" (e.g., "08:00", "14:30")
   dueDate     DateTime   @default(now())
-  priority    Priority   @default(MEDIUM)
-  status      TaskStatus @default(PENDING)
+  priority    String     @default("MEDIUM")
+  status      String     @default("PENDING")
   icon        String     @default("Sprout")
   
   // SMS Reminder fields
@@ -189,6 +151,7 @@ model Task {
   @@index([userId, status])
   @@index([dueDate])
 }
+
 model MarketplaceListing {
   id          String   @id @default(uuid())
   farmerId    Int
@@ -205,7 +168,7 @@ model MarketplaceListing {
   imageUrl    String?
   location    String
   
-  status      ListingStatus @default(ACTIVE)
+  status      String   @default("ACTIVE")
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -227,7 +190,7 @@ model MarketOrder {
   quantity    Float
   totalPrice  Float
   
-  status      MarketOrderStatus @default(PENDING)
+  status      String   @default("PENDING")
   
   deliveryAddress String?
   notes       String?
@@ -240,29 +203,15 @@ model MarketOrder {
   @@index([listingId])
 }
 
-enum ListingStatus {
-  ACTIVE
-  SOLD
-  EXPIRED
-  CANCELLED
-}
-
-enum MarketOrderStatus {
-  PENDING
-  CONFIRMED
-  SHIPPED
-  DELIVERED
-  CANCELLED
-}
 model CropImage {
   id            String   @id @default(uuid())
-  userId        Int      // ← Changed to Int
+  userId        Int      
   farmId        String
   imageUrl      String
   cropType      String
   healthScore   Float
   status        String
-  analysisData  Json
+  analysisData  String   // Use string for JSON storage if needed or Prisma Json
   uploadDate    DateTime @default(now())
   
   user          User     @relation("UserCropImages", fields: [userId], references: [id])
@@ -272,9 +221,9 @@ model CropImage {
 
 model CropRecommendation {
   id              String   @id @default(uuid())
-  userId          Int      // ← Changed to Int
-  recommendations Json
-  inputData       Json
+  userId          Int      
+  recommendations String
+  inputData       String
   createdAt       DateTime @default(now())
   
   user            User     @relation("UserCropRecommendations", fields: [userId], references: [id])
@@ -290,8 +239,8 @@ model Crop {
   plantedDate      DateTime
   expectedHarvest  DateTime
   location         String?
-  area             Float?      // in acres or hectares
-  status           CropStatus  @default(ACTIVE)
+  area             Float?      
+  status           String      @default("ACTIVE")
   
   // Latest Analysis Data
   latestHealthScore       Int?
@@ -300,8 +249,8 @@ model Crop {
   latestDiseaseName      String?
   latestDiseaseConfidence Int?
   latestPestActivity     String?
-  latestColorAnalysis    Json?     // {greenness, yellowingLevel, browningLevel}
-  latestGeminiInsights   Json?     // {overallAssessment, diseaseRisk, recommendations, visualObservations}
+  latestColorAnalysis    String?     
+  latestGeminiInsights   String?     
   latestAnalyzedAt       DateTime?
   
   images           CropAnalysisImage[]
@@ -336,13 +285,13 @@ model CropAnalysisImage {
   leafCondition         String?
   heightEstimate        String?
   
-  colorAnalysis         Json?    // {greenness, yellowingLevel, browningLevel}
-  observations          String[] // Array of observation strings
-  recommendations       String[] // Array of recommendation strings
+  colorAnalysis         String?    
+  observations          String? 
+  recommendations       String? 
   diseaseRisk           String?
   overallAssessment     String?
   
-  processingStatus      ProcessingStatus @default(PENDING)
+  processingStatus      String   @default("PENDING")
   errorMessage          String?
   
   createdAt             DateTime @default(now())
@@ -373,15 +322,19 @@ model CropAnalysisHistory {
   @@map("crop_analysis_history")
 }
 
-enum CropStatus {
-  ACTIVE
-  HARVESTED
-  FAILED
-}
+model CommunityPost {
+  id        Int      @id @default(autoincrement())
+  content   String
+  category  String   @default("General")
+  tags      String?  // stored as JSON string or comma separated
+  imageUrl  String?
+  authorId  Int
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  likes     Int      @default(0)
+  comments  Int      @default(0)
+  shares    Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-enum ProcessingStatus {
-  PENDING
-  PROCESSING
-  COMPLETED
-  FAILED
+  @@map("community_posts")
 }

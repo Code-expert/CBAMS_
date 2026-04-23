@@ -176,7 +176,21 @@ io.on('connection', (socket) => {
 });
 
 // Start server
-server.listen(PORT,'0.0.0.0', () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`🔌 Socket.IO ready for WebRTC`);
+  
+  // Connect to DB in background
+  console.log('📡 Attempting database connection...');
+  prisma.$connect()
+    .then(() => console.log('✅ Database connected successfully'))
+    .catch(error => {
+      console.error('❌ Database connection failed:', error.message);
+      console.log('⚠️ Running in disconnected mode. Data features will fail.');
+    });
+});
+
+// Handle crashes gracefully
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('⚠️ Unhandled Rejection at:', promise, 'reason:', reason);
 });

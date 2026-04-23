@@ -17,6 +17,7 @@ import ExpertConsultationPage from './pages/Session.jsx'
 import ExpertDashboard from './pages/ExpertDashboard.jsx'
 import VideoCall from './pages/VideoCall.jsx'
 import Settings from './pages/Setting.jsx'
+import Playground from './pages/Playground.jsx'
 
 const appRouter = createBrowserRouter([
   {
@@ -77,7 +78,7 @@ const appRouter = createBrowserRouter([
         path: '/schedules',
         element: (
           <ProtectedRoute>
-            <div>Schedules Page</div> {/* Replace with your Schedules component */}
+            <TasksTab />
           </ProtectedRoute>
         ),
       },
@@ -105,12 +106,20 @@ const appRouter = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      {
+        path: '/playground',
+        element: (
+          <ProtectedRoute>
+            <Playground />
+          </ProtectedRoute>
+        ),
+      },
       // Role-based protected routes
       {
         path: '/admin',
         element: (
           <ProtectedRoute requiredRole="ADMIN">
-            <div>Admin Panel</div> {/* Replace with your Admin component */}
+            <Dashboard />
           </ProtectedRoute>
         ),
       },

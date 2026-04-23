@@ -1,6 +1,7 @@
 import express from 'express';
 import { 
   getAllListings,
+  getAllFertilizers,
   createListing,
   getMyListings,
   updateListing,
@@ -15,6 +16,7 @@ const router = express.Router();
 
 // PUBLIC ROUTES - Browse all listings
 router.get('/listings', getAllListings);
+router.get('/fertilizers', getAllFertilizers);
 
 // AUTHENTICATED ROUTES - Need login
 router.post('/listings', protect, createListing);

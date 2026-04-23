@@ -1,44 +1,47 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Play, Smartphone, TrendingUp, Users, Shield, ChevronDown } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const HeroSection = () => {
+  const { t } = useTranslation();
   const [currentSlide, setCurrentSlide] = useState(0);
+  const navigate = useNavigate();
   
   const heroSlides = [
     {
-      title: "Empowering Farmers with Smart Technology",
-      subtitle: "Transform your farming with AI-powered insights, weather forecasting, and market intelligence",
+      title: t("Empowering Farmers with Smart Technology") || "Empowering Farmers with Smart Technology",
+      subtitle: t("Transform your farming with AI-powered insights, weather forecasting, and market intelligence") || "Transform your farming with AI-powered insights, weather forecasting, and market intelligence",
       image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1200&h=800&fit=crop",
-      cta: "Start Your Journey"
+      cta: t("Start Your Journey") || "Start Your Journey"
     },
     {
-      title: "Real-time Crop Monitoring & Analytics",
-      subtitle: "Monitor crop health, soil conditions, and optimize yields with precision agriculture",
+      title: t("Real-time Crop Monitoring & Analytics") || "Real-time Crop Monitoring & Analytics",
+      subtitle: t("Monitor crop health, soil conditions, and optimize yields with precision agriculture") || "Monitor crop health, soil conditions, and optimize yields with precision agriculture",
       image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=1200&h=800&fit=crop",
-      cta: "Explore Features"
+      cta: t("Explore Features") || "Explore Features"
     },
     {
-      title: "Connect with Markets & Community",
-      subtitle: "Access direct market prices, connect with buyers, and join a thriving farming community",
+      title: t("Connect with Markets & Community") || "Connect with Markets & Community",
+      subtitle: t("Access direct market prices, connect with buyers, and join a thriving farming community") || "Access direct market prices, connect with buyers, and join a thriving farming community",
       image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=1200&h=800&fit=crop",
-      cta: "Join Community"
+      cta: t("Join Community") || "Join Community"
     }
   ];
 
   const stats = [
-
-    { icon: Shield, number: "95%", label: "Crop Success Rate" },
-    { icon: Smartphone, number: "24/7", label: "Support Available" }
+    { icon: Shield, number: "95%", label: t("Crop Success Rate") || "Crop Success Rate" },
+    { icon: Smartphone, number: "24/7", label: t("Support Available") || "Support Available" }
   ];
 
   const features = [
-    "Weather Forecasting",
-    "Crop Disease Detection", 
-    "Market Price Tracking",
-    "Soil Analysis",
-    "Irrigation Management",
-    "Expert Consultation"
+    t("Weather Forecasting") || "Weather Forecasting",
+    t("Crop Disease Detection") || "Crop Disease Detection",
+    t("Market Price Tracking") || "Market Price Tracking",
+    t("Soil Analysis") || "Soil Analysis",
+    t("Irrigation Management") || "Irrigation Management",
+    t("Expert Consultation") || "Expert Consultation"
   ];
 
   useEffect(() => {
@@ -100,7 +103,7 @@ const HeroSection = () => {
                 className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 rounded-full border border-green-200"
               >
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-sm font-semibold">🌱 Smart Agriculture Platform</span>
+                <span className="text-sm font-semibold">🌱 {t("Smart Agriculture Platform") || "Smart Agriculture Platform"}</span>
               </motion.div>
 
               {/* Main Heading */}
@@ -155,6 +158,7 @@ const HeroSection = () => {
                 className="flex flex-col sm:flex-row gap-4"
               >
                 <motion.button
+                  onClick={() => navigate('/login')}
                   whileHover={{ scale: 1.05, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)" }}
                   whileTap={{ scale: 0.95 }}
                   className="group inline-flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
@@ -164,12 +168,13 @@ const HeroSection = () => {
                 </motion.button>
 
                 <motion.button
+                  onClick={() => navigate('/login')}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="group inline-flex items-center justify-center gap-3 px-8 py-4 bg-white text-gray-700 font-semibold rounded-2xl border-2 border-gray-200 hover:border-green-300 hover:text-green-600 transition-all duration-300"
                 >
                   <Play className="w-5 h-5" />
-                  <span>Watch Demo</span>
+                  <span>{t("Watch Demo") || "Watch Demo"}</span>
                 </motion.button>
               </motion.div>
 
@@ -237,7 +242,7 @@ const HeroSection = () => {
                       <TrendingUp className="w-6 h-6 text-green-600" />
                     </div>
                     <div>
-                      <div className="text-sm font-semibold text-gray-900">Yield Increased</div>
+                      <div className="text-sm font-semibold text-gray-900">{t("Yield Increased") || "Yield Increased"}</div>
                       <div className="text-lg font-bold text-green-600">+32%</div>
                     </div>
                   </div>
@@ -286,7 +291,7 @@ const HeroSection = () => {
             transition={{ duration: 2, repeat: Infinity }}
             className="flex flex-col items-center gap-2 text-gray-600"
           >
-            <span className="text-sm font-medium">Scroll to explore</span>
+            <span className="text-sm font-medium">{t("Scroll to explore") || "Scroll to explore"}</span>
             <ChevronDown className="w-5 h-5" />
           </motion.div>
         </motion.div>

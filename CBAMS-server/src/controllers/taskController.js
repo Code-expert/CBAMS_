@@ -79,10 +79,10 @@ export const createTask = async (req, res) => {
       }
     });
 
-    // Schedule SMS reminder if enabled
-    if (task.reminderEnabled && task.user.profile?.phone) {
-      scheduleTaskReminder(task);
-    }
+    // SMS reminder currently disabled
+    // if (task.reminderEnabled && task.user.profile?.phone) {
+    //   scheduleTaskReminder(task);
+    // }
 
     res.status(201).json(task);
   } catch (error) {
@@ -126,13 +126,13 @@ export const updateTask = async (req, res) => {
       }
     });
 
-    // Reschedule reminder if time/date changed
-    if (time || dueDate) {
-      cancelTaskReminder(task.id);
-      if (task.reminderEnabled && task.user.profile?.phone) {
-        scheduleTaskReminder(task);
-      }
-    }
+    // Reschedule reminder if time/date changed (currently disabled)
+    // if (time || dueDate) {
+    //   cancelTaskReminder(task.id);
+    //   if (task.reminderEnabled && task.user.profile?.phone) {
+    //     scheduleTaskReminder(task);
+    //   }
+    // }
 
     res.json(task);
   } catch (error) {
@@ -164,10 +164,10 @@ export const updateTaskStatus = async (req, res) => {
       data: { status }
     });
 
-    // Cancel reminder if task completed
-    if (status === 'COMPLETED') {
-      cancelTaskReminder(task.id);
-    }
+    // Cancel reminder if task completed (currently disabled)
+    // if (status === 'COMPLETED') {
+    //   cancelTaskReminder(task.id);
+    // }
 
     res.json(task);
   } catch (error) {
@@ -193,7 +193,7 @@ export const deleteTask = async (req, res) => {
       return res.status(404).json({ message: "Task not found" });
     }
 
-    cancelTaskReminder(Number(id));
+    // cancelTaskReminder(Number(id)); // Currently disabled
 
     await prisma.task.delete({
       where: { id: Number(id) }

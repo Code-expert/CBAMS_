@@ -11,6 +11,8 @@ from werkzeug.utils import secure_filename
 from models.crop_recommendation import CropRecommendationModel
 from models.crop_health_analyzer import CropHealthAnalyzer
 from models.disease_detector import DiseaseDetector
+from models.yield_predictor import YieldPredictor
+from models.price_predictor import PricePredictor
 
 app = Flask(__name__)
 CORS(app)
@@ -29,6 +31,8 @@ print("🚀 Initializing ML models...")
 crop_recommender = CropRecommendationModel()
 health_analyzer = CropHealthAnalyzer()
 disease_detector = DiseaseDetector()
+yield_predictor = YieldPredictor()
+price_predictor = PricePredictor()
 print("✅ Models loaded successfully!")
 
 def allowed_file(filename):
@@ -42,6 +46,35 @@ def recommend_crop():
         recommendations = crop_recommender.predict(data)
         return jsonify({
             'recommendations': recommendations,
+            'timestamp': datetime.now().isoformat()
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# ========== CROP YIELD PREDICTION ==========
+@app.route('/api/ml/predict-yield', methods=['POST'])
+def predict_yield():
+    try:
+        data = request.json
+        prediction = yield_predictor.predict(data)
+        return jsonify({
+            'success': True,
+            'prediction': prediction,
+            'timestamp': datetime.now().isoformat()
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# ========== MARKET PRICE PREDICTION ==========
+@app.route('/api/ml/predict-price', methods=['POST'])
+def predict_price():
+    try:
+        data = request.json
+        crop = data.get('crop', 'Rice')
+        price_data = price_predictor.predict_forecast(crop)
+        return jsonify({
+            'success': True,
+            'price_data': price_data,
             'timestamp': datetime.now().isoformat()
         }), 200
     except Exception as e:

@@ -29,8 +29,8 @@ export const getCropRecommendation = async (req, res) => {
     const savedRecommendation = await prisma.cropRecommendation.create({
       data: {
         userId: userId,
-        recommendations: recommendation,
-        inputData: locationData,
+        recommendations: JSON.stringify(recommendation),
+        inputData: JSON.stringify(locationData),
       }
     });
 

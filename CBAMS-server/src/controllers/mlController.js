@@ -2,6 +2,8 @@ import axios from 'axios';
 import FormData from 'form-data';
 import { PrismaClient } from '@prisma/client';
 import fs from 'fs';
+import { analyzeImageWithGemini } from '../services/geminiService.js';
+import { uploadToCloudinary } from '../config/cloudinary.js';
 
 const prisma = new PrismaClient();
 const ML_SERVICE_URL = 'http://localhost:5001/api/ml';
@@ -42,7 +44,16 @@ export const uploadCropImage = async (req, res) => {
     
     // Create form data for ML service
     const formData = new FormData();
-    formData.append('image', fs.createReadStream(req.file.path));
+    
+    if (req.file.buffer) {
+      formData.append('image', req.file.buffer, {
+        filename: req.file.originalname,
+        contentType: req.file.mimetype,
+      });
+    } else {
+      formData.append('image', fs.createReadStream(req.file.path));
+    }
+    
     formData.append('userId', req.user.id);
     formData.append('cropType', cropType || 'unknown');
     formData.append('farmId', farmId || 'default');
@@ -66,8 +77,10 @@ export const uploadCropImage = async (req, res) => {
       }
     });
     
-    // Clean up temp file
-    fs.unlinkSync(req.file.path);
+    // Clean up temp file (only if using disk storage)
+    if (req.file.path) {
+      fs.unlinkSync(req.file.path);
+    }
     
     res.json({
       success: true,
@@ -89,20 +102,123 @@ export const detectDisease = async (req, res) => {
     }
     
     const formData = new FormData();
-    formData.append('image', fs.createReadStream(req.file.path));
+    
+    if (req.file.buffer) {
+      formData.append('image', req.file.buffer, {
+        filename: req.file.originalname,
+        contentType: req.file.mimetype,
+      });
+    } else {
+      formData.append('image', fs.createReadStream(req.file.path));
+    }
     
     const response = await axios.post(`${ML_SERVICE_URL}/detect-disease`, formData, {
       headers: formData.getHeaders()
     });
     
     // Clean up
-    fs.unlinkSync(req.file.path);
+    if (req.file.path) {
+      fs.unlinkSync(req.file.path);
+    }
     
-    res.json(response.data);
+    return res.json(response.data);
     
   } catch (error) {
-    console.error('❌ Disease Detection Error:', error.message);
-    res.status(500).json({ error: 'Failed to detect disease' });
+    console.error('⚠️ Local ML Service inaccessible, attempting expert fallback to Gemini:', error.message);
+    
+    try {
+      // 1. Upload to Cloudinary to get a permanent URL for Gemini
+      const cloudinaryResult = await uploadToCloudinary(
+        req.file.buffer || fs.readFileSync(req.file.path),
+        'cbams-expert-fallback'
+      );
+      
+      // 2. Call Gemini for analysis
+      // Note: We're passing a mock crop object for context
+      const geminiResult = await analyzeImageWithGemini(
+        cloudinaryResult.secure_url,
+        'fallback_' + Date.now(),
+        { type: 'Unknown', plantedDate: new Date() }
+      );
+      
+      // 3. Map Gemini result to expected detection format
+      const formattedResult = {
+        success: true,
+        detection: {
+          diseaseDetected: geminiResult.diseaseDetected,
+          disease: {
+            name: geminiResult.diseaseName || 'Healthy',
+            description: geminiResult.overallAssessment,
+            treatment: geminiResult.treatment || 'No specific treatment needed'
+          },
+          severity: {
+            level: geminiResult.diseaseRisk,
+            score: geminiResult.healthScore,
+          },
+          recommendations: geminiResult.recommendations,
+          confidence: geminiResult.diseaseConfidence || 90,
+          analysisTier: 'Gemini Expert (Fallback Tier)'
+        },
+        timestamp: new Date().toISOString()
+      };
+      
+      // Clean up local file if exists
+      if (req.file.path) {
+        fs.unlinkSync(req.file.path);
+      }
+      
+      return res.json(formattedResult);
+      
+    } catch (fallbackError) {
+      console.error('❌ Both ML and Gemini fallback failed:', fallbackError.message);
+      
+      if (req.file.path) {
+        fs.unlinkSync(req.file.path);
+      }
+      
+      return res.status(500).json({ 
+        error: 'Analysis failed. Both local ML and expert fallback services are unavailable.',
+        details: fallbackError.message 
+      });
+    }
+  }
+};
+
+// ========== CROP YIELD PREDICTION ==========
+export const getYieldPrediction = async (req, res) => {
+  try {
+    const { nitrogen, phosphorus, potassium, temperature, rainfall, area } = req.body;
+    
+    // Call ML service
+    const response = await axios.post(`${ML_SERVICE_URL}/predict-yield`, {
+      nitrogen, phosphorus, potassium, temperature, rainfall, area
+    });
+    
+    res.json(response.data);
+  } catch (error) {
+    console.error('❌ Yield Prediction Error:', error.message);
+    res.status(500).json({ error: 'Failed to get yield prediction' });
+  }
+};
+
+// ========== MARKET PRICE FORECAST ==========
+export const getPriceForecast = async (req, res) => {
+  try {
+    const { crop } = req.query; // e.g., ?crop=Rice
+    
+    if (!crop) {
+      return res.status(400).json({ error: 'Crop type is required' });
+    }
+    
+    // Call ML service
+    const response = await axios.post(`${ML_SERVICE_URL}/predict-price`, {
+      crop
+    });
+    
+    res.json(response.data);
+  } catch (error) {
+    console.error('❌ Price Forecast Error:', error.message);
+    res.status(500).json({ error: 'Failed to get price forecast' });
   }
 };
 

@@ -5,8 +5,6 @@ import { motion } from 'framer-motion';
 import { 
   User, 
   Mail, 
-  Phone, 
-  MapPin, 
   Lock,   
   Eye, 
   EyeOff, 
@@ -21,12 +19,8 @@ const SignupForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    name: '',
     email: '',
-    phone: '',
-    location: '',
-    farmSize: '',
     role: '',
     password: '',
     confirmPassword: '',
@@ -41,12 +35,6 @@ const SignupForm = () => {
     (state) => state.auth
   );
 
-  const farmSizeOptions = [
-    { value: '', label: 'Select farm size' },
-    { value: 'small', label: 'Small (< 2 acres)' },
-    { value: 'medium', label: 'Medium (2-10 acres)' },
-    { value: 'large', label: 'Large (10+ acres)' }
-  ];
 
   const roleOptions = [
     { value: '', label: 'Select your role' },
@@ -80,13 +68,9 @@ const SignupForm = () => {
     e.preventDefault();
     const newErrors = {};
 
-    // Validation logic (keep your existing validation)
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required';
-    }
-
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required';
+    // Validation logic
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
     }
 
     if (!formData.email) {
@@ -95,16 +79,8 @@ const SignupForm = () => {
       newErrors.email = 'Invalid email format';
     }
 
-    if (!formData.location.trim()) {
-      newErrors.location = 'Location is required';
-    }
-
     if (!formData.role) {
       newErrors.role = 'Role selection is required';
-    }
-
-    if (formData.role === 'FARMER' && !formData.farmSize) {
-      newErrors.farmSize = 'Farm size is required for farmers';
     }
 
     if (!formData.password) {
@@ -128,15 +104,12 @@ const SignupForm = () => {
 
     setErrors({});
 
-    // Prepare data for backend (combine first and last name)
+    // Prepare data for backend
     const userData = {
-      name: `${formData.firstName} ${formData.lastName}`.trim(),
+      name: formData.name.trim(),
       email: formData.email,
       password: formData.password,
-      role: formData.role.toUpperCase(),
-      location: formData.location,
-      ...(formData.phone && { phone: formData.phone }),
-      ...(formData.role === 'FARMER' && { farmSize: formData.farmSize })
+      role: formData.role.toUpperCase()
     };
 
     // Dispatch Redux action
@@ -169,49 +142,26 @@ const SignupForm = () => {
         </div>
       )}
 
-      {/* Name Fields */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            First Name
-          </label>
-          <div className="relative">
-            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              value={formData.firstName}
-              onChange={(e) => handleInputChange('firstName', e.target.value)}
-              className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300 ${
-                errors.firstName ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'
-              }`}
-              placeholder="First name"
-            />
-          </div>
-          {errors.firstName && (
-            <div className="text-red-600 text-xs mt-1">{errors.firstName}</div>
-          )}
+      {/* Name Field */}
+      <div>
+        <label className="block text-sm font-semibold text-gray-700 mb-2">
+          Full Name
+        </label>
+        <div className="relative">
+          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <input
+            type="text"
+            value={formData.name}
+            onChange={(e) => handleInputChange('name', e.target.value)}
+            className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300 ${
+              errors.name ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'
+            }`}
+            placeholder="John Doe"
+          />
         </div>
-        
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Last Name
-          </label>
-          <div className="relative">
-            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              value={formData.lastName}
-              onChange={(e) => handleInputChange('lastName', e.target.value)}
-              className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300 ${
-                errors.lastName ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'
-              }`}
-              placeholder="Last name"
-            />
-          </div>
-          {errors.lastName && (
-            <div className="text-red-600 text-xs mt-1">{errors.lastName}</div>
-          )}
-        </div>
+        {errors.name && (
+          <div className="text-red-600 text-xs mt-1">{errors.name}</div>
+        )}
       </div>
 
       {/* Email */}
@@ -236,84 +186,33 @@ const SignupForm = () => {
         )}
       </div>
 
-      {/* Location & Role */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Location
-          </label>
-          <div className="relative">
-            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              value={formData.location}
-              onChange={(e) => handleInputChange('location', e.target.value)}
-              className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300 ${
-                errors.location ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'
-              }`}
-              placeholder="Your location"
-            />
-          </div>
-          {errors.location && (
-            <div className="text-red-600 text-xs mt-1">{errors.location}</div>
-          )}
-        </div>
-        
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Role
-          </label>
-          <div className="relative">
-            <UserCircle className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <select
-              value={formData.role}
-              onChange={(e) => handleInputChange('role', e.target.value)}
-              className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300 ${
-                errors.role ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'
-              }`}
-            >
-              {roleOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          {errors.role && (
-            <div className="text-red-600 text-xs mt-1">{errors.role}</div>
-          )}
-        </div>
-      </div>
-
-      {/* Farm Size - Only show for farmers */}
-      {formData.role === 'FARMER' && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Farm Size
-          </label>
+      {/* Role */}
+      <div>
+        <label className="block text-sm font-semibold text-gray-700 mb-2">
+          Role
+        </label>
+        <div className="relative">
+          <UserCircle className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
           <select
-            value={formData.farmSize}
-            onChange={(e) => handleInputChange('farmSize', e.target.value)}
-            className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300 ${
-              errors.farmSize ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'
+            value={formData.role}
+            onChange={(e) => handleInputChange('role', e.target.value)}
+            className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300 ${
+              errors.role ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'
             }`}
           >
-            {farmSizeOptions.map((option) => (
+            {roleOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
             ))}
           </select>
-          {errors.farmSize && (
-            <div className="text-red-600 text-xs mt-1">{errors.farmSize}</div>
-          )}
-        </motion.div>
-      )}
+        </div>
+        {errors.role && (
+          <div className="text-red-600 text-xs mt-1">{errors.role}</div>
+        )}
+      </div>
+
+
 
       {/* Password Fields */}
       <div className="grid grid-cols-2 gap-4">

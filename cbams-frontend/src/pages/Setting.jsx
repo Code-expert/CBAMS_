@@ -27,8 +27,11 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../redux/slices/authSlice';
 import axios from '../utils/axiosConfig';
+import { useTranslation } from 'react-i18next';
+import { languages } from '../constants/languages';
 
-const Settings = () => {
+const Settings = ({ currentLanguage, setCurrentLanguage }) => {
+  const { t, i18n } = useTranslation();
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
 
@@ -247,9 +250,9 @@ const Settings = () => {
         <div className="mb-8">
           <h1 className="text-4xl font-black text-gray-900 flex items-center gap-3">
             <SettingsIcon className="text-green-600" />
-            Settings
+            {t("Settings") || "Settings"}
           </h1>
-          <p className="text-gray-600 mt-2">Manage your account preferences and settings</p>
+          <p className="text-gray-600 mt-2">{t("Manage your account preferences and settings") || "Manage your account preferences and settings"}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -269,7 +272,7 @@ const Settings = () => {
                     }`}
                   >
                     <Icon className="w-5 h-5" />
-                    <span className="font-medium">{section.name}</span>
+                    <span className="font-medium">{t(section.name) || section.name}</span>
                     <ChevronRight className="w-4 h-4 ml-auto" />
                   </button>
                 );
@@ -285,7 +288,7 @@ const Settings = () => {
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl mt-4 text-red-600 hover:bg-red-50 transition-all"
               >
                 <LogOut className="w-5 h-5" />
-                <span className="font-medium">Logout</span>
+                <span className="font-medium">{t("Logout") || "Logout"}</span>
               </button>
             </div>
           </div>
@@ -296,7 +299,7 @@ const Settings = () => {
               {/* Profile Section */}
               {activeSection === 'profile' && (
                 <div>
-                  <h2 className="text-2xl font-black text-gray-900 mb-6">Profile Information</h2>
+                  <h2 className="text-2xl font-black text-gray-900 mb-6">{t("Profile Information") || "Profile Information"}</h2>
 
                   {/* Profile Picture */}
                   <div className="flex items-center gap-6 mb-8 pb-8 border-b-2 border-gray-100">
@@ -598,14 +601,23 @@ const Settings = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-2">Language</label>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">{t("Language") || "Language"}</label>
                       <div className="relative">
                         <Globe className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                        <select className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500">
-                          <option value="en">English</option>
-                          <option value="hi">हिंदी (Hindi)</option>
-                          <option value="mr">मराठी (Marathi)</option>
-                          <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
+                        <select 
+                          value={currentLanguage || i18n.language}
+                          onChange={(e) => {
+                            const lng = e.target.value;
+                            if(setCurrentLanguage) setCurrentLanguage(lng);
+                            i18n.changeLanguage(lng);
+                          }}
+                          className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
+                        >
+                          {languages.map((lang) => (
+                            <option key={lang.code} value={lang.code}>
+                              {lang.name}
+                            </option>
+                          ))}
                         </select>
                       </div>
                     </div>

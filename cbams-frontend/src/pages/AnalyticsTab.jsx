@@ -19,8 +19,10 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { cropService } from '../services/cropService';
+import { useTranslation } from 'react-i18next';
 
 const AnalyticsPage = () => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [data, setData] = useState(null);
@@ -134,7 +136,7 @@ const AnalyticsPage = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Loader className="w-16 h-16 text-green-600 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600 font-semibold">Loading analytics...</p>
+          <p className="text-gray-600 font-semibold">{t("Loading analytics...") || "Loading analytics..."}</p>
         </div>
       </div>
     );
@@ -406,7 +408,7 @@ const AnalyticsPage = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-bold text-gray-800">Crop Health Analytics</h1>
+            <h1 className="text-4xl font-bold text-gray-800">{t("Crop Health Analytics") || "Crop Health Analytics"}</h1>
             <div className="flex items-center space-x-2 text-gray-500 mt-2">
               <Calendar className="w-5 h-5" />
               <span className="text-sm">Updated: {new Date().toLocaleDateString()}</span>
@@ -417,7 +419,7 @@ const AnalyticsPage = () => {
             className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold flex items-center space-x-2 shadow-md"
           >
             <Plus className="w-5 h-5" />
-            <span>Add New Crop</span>
+            <span>{t("Add New Crop") || "Add New Crop"}</span>
           </button>
         </div>
 
@@ -438,8 +440,8 @@ const AnalyticsPage = () => {
         {data && data.crops.length === 0 ? (
           <div className="bg-white border border-gray-200 rounded-2xl p-12 text-center shadow-lg">
             <Leaf className="w-20 h-20 text-green-600 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-gray-800 mb-2">No Crops Yet</h3>
-            <p className="text-gray-600 mb-6">Start by adding your first crop to track its health and progress with AI-powered analysis.</p>
+            <h3 className="text-2xl font-bold text-gray-800 mb-2">{t("No Crops Yet") || "No Crops Yet"}</h3>
+            <p className="text-gray-600 mb-6">{t("Start by adding your first crop to track its health and progress with AI-powered analysis.") || "Start by adding your first crop to track its health and progress with AI-powered analysis."}</p>
             <button
               onClick={() => setShowCreateModal(true)}
               className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold inline-flex items-center space-x-2"
@@ -570,7 +572,7 @@ const AnalyticsPage = () => {
             {/* AI Info Section */}
             <div className="bg-gradient-to-r from-purple-500 via-violet-500 to-blue-500 rounded-2xl p-8 text-white shadow-xl">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold">Powered by  AI</h3>
+                <h3 className="text-2xl font-bold">Powered by AI</h3>
                 <Camera className="w-10 h-10" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
@@ -591,6 +593,74 @@ const AnalyticsPage = () => {
                 </div>
               </div>
             </div>
+
+            {/* ML Prediction Tools */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+              {/* Yield Predictor */}
+              <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+                <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                  <BarChart3 className="w-6 h-6 mr-2 text-green-600" />
+                  Yield Predictor
+                </h3>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Area (Hectares)</label>
+                      <input type="number" id="yield-area" defaultValue="1" className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Nitrogen (N)</label>
+                      <input type="number" id="yield-n" defaultValue="80" className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
+                    </div>
+                  </div>
+                  <button 
+                    onClick={async () => {
+                      const data = {
+                        area: document.getElementById('yield-area').value,
+                        nitrogen: document.getElementById('yield-n').value,
+                      };
+                      const result = await cropService.getYieldPrediction(data);
+                      alert(`Estimated Yield: ${result.prediction.estimatedYield} Tonnes\nConfidence: ${result.prediction.confidence * 100}%`);
+                    }}
+                    className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+                  >
+                    Calculate Estimated Yield
+                  </button>
+                </div>
+              </div>
+
+              {/* Price Forecast */}
+              <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+                <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                  <TrendingUp className="w-6 h-6 mr-2 text-blue-600" />
+                  Market Price Forecast
+                </h3>
+                <div className="space-y-4">
+                  <select id="price-crop" className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <option>Rice</option>
+                    <option>Maize</option>
+                    <option>Wheat</option>
+                    <option>Cotton</option>
+                  </select>
+                  <button 
+                    onClick={async () => {
+                      const crop = document.getElementById('price-crop').value;
+                      const result = await cropService.getPriceForecast(crop);
+                      console.log(result.price_data);
+                      alert(`Current Price for ${crop}: ${result.price_data.currentPrice} INR/Q\nTrend: ${result.price_data.marketRecommendation}`);
+                    }}
+                    className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                  >
+                    Get Price Forecast
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/*  Disease Diagnostic Tool */}
+            <div className="mt-8">
+               <QuickDiseaseDiagnostic />
+            </div>
           </>
         )}
       </div>
@@ -606,6 +676,212 @@ const AnalyticsPage = () => {
     </div>
   );
 };
+
+// Quick Disease Diagnostic Component
+const QuickDiseaseDiagnostic = () => {
+  const { t } = useTranslation();
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
+
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      setPreview(URL.createObjectURL(file));
+      setResult(null);
+      setError(null);
+    }
+  };
+
+  const handleAnalyze = async () => {
+    if (!selectedFile) return;
+    try {
+      setAnalyzing(true);
+      setError(null);
+      const data = await cropService.detectDisease(selectedFile);
+      setResult(data.detection);
+    } catch (err) {
+      console.error('Error analyzing disease:', err);
+      setError('Diagnostic failed. Please try again.');
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  const reset = () => {
+    setSelectedFile(null);
+    setPreview(null);
+    setResult(null);
+    setError(null);
+  };
+
+  const getSeverityBg = (level) => {
+    switch (level?.toLowerCase()) {
+      case 'low': return 'bg-green-100 text-green-700 border-green-200';
+      case 'moderate': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+      case 'high': return 'bg-orange-100 text-orange-700 border-orange-200';
+      case 'severe': return 'bg-red-100 text-red-700 border-red-200';
+      default: return 'bg-gray-100 text-gray-700 border-gray-200';
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-100 overflow-hidden relative">
+      <div className="absolute top-0 right-0 p-8 opacity-5">
+        <Bug className="w-40 h-40" />
+      </div>
+      
+      <div className="relative z-10">
+        <h3 className="text-3xl font-bold text-gray-800 mb-2 flex items-center">
+          <Camera className="w-8 h-8 mr-3 text-red-500" />
+          {t("AI Disease Diagnostic") || "AI Disease Diagnostic"}
+        </h3>
+        <p className="text-gray-600 mb-8 max-w-2xl">
+          {t("Upload a clear photo of your plant's leaf to identify potential diseases and get an immediate severity rating and treatment plan.") || "Upload a clear photo of your plant's leaf to identify potential diseases and get an immediate severity rating and treatment plan."}
+        </p>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+          {/* Upload Section */}
+          <div className="space-y-6">
+            {!preview ? (
+              <label className="group border-3 border-dashed border-gray-200 rounded-3xl p-12 flex flex-col items-center justify-center cursor-pointer hover:border-red-400 hover:bg-red-50 transition-all aspect-video">
+                <div className="bg-red-100 p-6 rounded-full group-hover:scale-110 transition-transform mb-4">
+                  <Upload className="w-10 h-10 text-red-600" />
+                </div>
+                <span className="text-lg font-bold text-gray-700">Select Leaf Photo</span>
+                <p className="text-sm text-gray-500 mt-2 text-center">Supports JPG, PNG (Max 5MB)</p>
+                <input type="file" className="hidden" onChange={handleFileSelect} accept="image/*" />
+              </label>
+            ) : (
+              <div className="space-y-4">
+                <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white aspect-video bg-gray-100">
+                  <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                  <button 
+                    onClick={reset}
+                    className="absolute top-4 right-4 bg-white/90 backdrop-blur p-2 rounded-full shadow-lg hover:bg-white text-gray-700"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleAnalyze}
+                    disabled={analyzing}
+                    className="flex-1 bg-gradient-to-r from-red-600 to-rose-600 text-white py-4 rounded-2xl font-bold text-lg shadow-lg hover:shadow-red-200 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center space-x-3"
+                  >
+                    {analyzing ? (
+                      <>
+                        <Loader className="w-6 h-6 animate-spin" />
+                        <span>AI is Analyzing...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Activity className="w-6 h-6" />
+                        <span>Start Diagnostic</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {error && (
+              <div className="bg-red-50 text-red-600 p-4 rounded-xl flex items-center space-x-2 border border-red-100">
+                <AlertCircle className="w-5 h-5" />
+                <span className="font-medium">{error}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Results Section */}
+          <div className="space-y-6">
+            {result ? (
+              <div className="bg-gray-50 rounded-3xl p-6 border border-gray-200 space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="text-sm text-gray-500 uppercase tracking-wider font-bold mb-1">Detected Disease</div>
+                    <h4 className="text-3xl font-black text-gray-800">{result.disease.name}</h4>
+                    <div className="flex items-center mt-2 space-x-2">
+                       <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold rounded uppercase tracking-tighter shadow-sm border border-blue-200">
+                         {result.analysisTier || 'Standard Analysis'}
+                       </span>
+                    </div>
+                  </div>
+                  <div className={`px-4 py-2 rounded-2xl border-2 font-bold text-sm ${getSeverityBg(result.severity.level)}`}>
+                    {result.severity.level} Severity
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                    <div className="text-xs text-gray-400 mb-1">Confidence</div>
+                    <div className="text-2xl font-bold text-red-600">{result.confidence.toFixed(1)}%</div>
+                  </div>
+                  <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                    <div className="text-xs text-gray-400 mb-1">Spread Risk</div>
+                    <div className="text-2xl font-bold text-orange-600">
+                      {result.severity.score > 20 ? 'High' : 'Moderate'}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                  <h5 className="font-bold text-gray-800 mb-3 flex items-center">
+                    <Droplet className="w-5 h-5 mr-2 text-blue-500" />
+                    AI Description
+                  </h5>
+                  <p className="text-gray-600 leading-relaxed">
+                    {result.disease.description}
+                  </p>
+                </div>
+
+                <div>
+                  <h5 className="font-bold text-gray-800 mb-3 flex items-center">
+                    <CheckCircle className="w-5 h-5 mr-2 text-green-500" />
+                    Recommended Treatment
+                  </h5>
+                  <div className="space-y-2">
+                    {result.recommendations.map((rec, i) => (
+                      <div key={i} className="flex items-start bg-green-50/50 p-3 rounded-xl border border-green-100 text-sm text-gray-700">
+                        <span className="mr-2 text-green-500 font-bold">•</span>
+                        {rec}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : !analyzing ? (
+              <div className="h-full flex flex-col items-center justify-center text-center p-12 bg-gray-50 rounded-3xl border border-dashed border-gray-200">
+                <div className="bg-white p-6 rounded-full shadow-inner mb-6">
+                  <Eye className="w-12 h-12 text-gray-400" />
+                </div>
+                <h4 className="text-xl font-bold text-gray-700 mb-2">Awaiting Diagnostic</h4>
+                <p className="text-gray-500 max-w-xs">
+                  Upload an image and click analyze to start the disease identification process.
+                </p>
+              </div>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-center p-12 space-y-6">
+                <div className="relative">
+                  <div className="w-24 h-24 border-4 border-red-100 border-t-red-600 rounded-full animate-spin"></div>
+                  <Bug className="w-10 h-10 text-red-600 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                </div>
+                <div className="space-y-2">
+                  <h4 className="text-xl font-bold text-gray-700 animate-pulse">Running Neural Analysis...</h4>
+                  <p className="text-gray-500">Comparing visual indicators with database</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 // Upload Image Modal Component
 const UploadImageModal = ({ isOpen, onClose, cropId, cropName, onSuccess }) => {

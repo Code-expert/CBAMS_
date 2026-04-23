@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Leaf, MapPin, Loader, Award, TrendingUp } from 'lucide-react';
-import axios from 'axios';
+import { translations } from '../../constants/languages';
+import api from '../../utils/axiosConfig';
 
 const CropRecommendation = ({ currentLanguage }) => {
+  const t = (key) => translations[currentLanguage]?.[key] || translations.en[key];
   const [loading, setLoading] = useState(false);
   const [recommendations, setRecommendations] = useState(null);
   const [location, setLocation] = useState(null);
@@ -22,12 +24,25 @@ const CropRecommendation = ({ currentLanguage }) => {
           setLocation({ lat, lon });
           
           try {
-            const response = await axios.get(
+            const response = await api.get(
               `/api/crop-recommendation/recommend?latitude=${lat}&longitude=${lon}`
             );
-            setRecommendations(response.data.data.recommendations.slice(0, 3));
+            let recs = response.data?.data?.recommendations || [];
+            if (recs.length === 0) {
+              recs = [
+                { crop: 'Maize (Demo)', reason: 'Suited for current local soil and temperature.', suitabilityScore: 92, expectedYield: '4-5 T/Ha', marketDemand: 'High' },
+                { crop: 'Soybean (Demo)', reason: 'Optimal rainfall predicted for this crop cycle.', suitabilityScore: 88, expectedYield: '2.5 T/Ha', marketDemand: 'Medium' },
+                { crop: 'Sunflower (Demo)', reason: 'High heat tolerance for upcoming months.', suitabilityScore: 85, expectedYield: '1.8 T/Ha', marketDemand: 'High' }
+              ];
+            }
+            setRecommendations(recs.slice(0, 3));
           } catch (error) {
             console.error('Error fetching recommendations:', error);
+            const fallback = [
+              { crop: 'Wheat (Demo)', reason: 'Reliable growth in current seasonal conditions.', suitabilityScore: 90, expectedYield: '3-4 T/Ha', marketDemand: 'High' },
+              { crop: 'Mustard (Demo)', reason: 'Low water requirement, perfect for dry spells.', suitabilityScore: 86, expectedYield: '1.5 T/Ha', marketDemand: 'Medium' }
+            ];
+            setRecommendations(fallback);
           } finally {
             setLoading(false);
           }
@@ -46,7 +61,7 @@ const CropRecommendation = ({ currentLanguage }) => {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-gray-800 flex items-center">
             <Leaf className="w-5 h-5 mr-2 text-green-600" />
-            Crop Recommendations
+            {t('cropRecommendations')}
           </h2>
         </div>
         <div className="flex items-center justify-center h-40">
@@ -61,12 +76,12 @@ const CropRecommendation = ({ currentLanguage }) => {
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-gray-800 flex items-center">
           <Leaf className="w-5 h-5 mr-2 text-green-600" />
-          Recommended Crops
+          {t('recommendedCrops')}
         </h2>
         {location && (
           <div className="flex items-center text-xs text-gray-500">
             <MapPin className="w-3 h-3 mr-1" />
-            Your Location
+            {t('yourLocation')}
           </div>
         )}
       </div>
@@ -94,14 +109,14 @@ const CropRecommendation = ({ currentLanguage }) => {
               
               <div className="flex items-center justify-between mt-3 pt-3 border-t border-green-200">
                 <div className="text-xs text-gray-600">
-                  <span className="font-semibold">Yield:</span> {crop.expectedYield}
+                  <span className="font-semibold">{t('yield')}:</span> {crop.expectedYield}
                 </div>
                 <div className={`text-xs font-semibold ${
                   crop.marketDemand === 'High' ? 'text-green-600' :
                   crop.marketDemand === 'Medium' ? 'text-amber-600' :
                   'text-gray-600'
                 }`}>
-                  {crop.marketDemand} Demand
+                  {crop.marketDemand === 'High' ? t('high') : crop.marketDemand === 'Medium' ? t('medium') : t('low')} {t('demand')}
                 </div>
               </div>
             </motion.div>
@@ -120,7 +135,7 @@ const CropRecommendation = ({ currentLanguage }) => {
           className="w-full mt-4 py-2 text-sm text-green-600 hover:text-green-700 font-semibold flex items-center justify-center space-x-2"
         >
           <TrendingUp className="w-4 h-4" />
-          <span>View All Recommendations</span>
+          <span>{t('viewAll')}</span>
         </button>
       )}
     </div>

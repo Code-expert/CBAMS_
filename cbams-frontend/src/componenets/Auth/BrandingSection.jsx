@@ -78,10 +78,10 @@ const BrandingSection = ({ isLogin }) => {
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-6 pt-8 border-t border-gray-200">
-        {/* <div className="text-center">
+        <div className="text-center">
           <div className="text-2xl font-bold text-green-600">50K+</div>
           <div className="text-sm text-gray-600">Active Farmers</div>
-        </div> */}
+        </div>
         <div className="text-center">
           <div className="text-2xl font-bold text-green-600">95%</div>
           <div className="text-sm text-gray-600">Success Rate</div>

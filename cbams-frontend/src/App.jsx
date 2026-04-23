@@ -1,16 +1,9 @@
 import React from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
-import Navbar from './componenets/Layouts/Navbar.jsx';
+import { Outlet } from 'react-router-dom';
 
 function App() {
-  const location = useLocation();
-  
-  // Don't show navbar on login page
-  const showNavbar = location.pathname !== '/login';
-
   return (
     <div className="App">
-      
       <main>
         <Outlet />
       </main>

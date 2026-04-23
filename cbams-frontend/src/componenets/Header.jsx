@@ -5,15 +5,14 @@ import {
   Leaf,
   Menu,
   X,
-  Search,
   User,
   Settings,
-  MessageCircle,
   LogOut,
   ChevronDown
 } from 'lucide-react';
 import { languages, translations } from '../constants/languages';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from 'react-redux'; 
 import { logout } from '../redux/slices/authSlice';
 
@@ -23,6 +22,7 @@ const Header = ({ sidebarOpen, setSidebarOpen, currentLanguage, setCurrentLangua
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const { user } = useSelector((state) => state.auth);
+  const { i18n } = useTranslation();
 
 
   const t = (key) => translations[currentLanguage]?.[key] || translations.en[key];
@@ -38,9 +38,7 @@ const Header = ({ sidebarOpen, setSidebarOpen, currentLanguage, setCurrentLangua
 
   const profileMenuItems = [
     { icon: User, label: t("profile") || "Profile", href: "/profile" },
-    { icon: Settings, label: t("settings") || "Settings", href: "/profile"},
-    { icon: Bell, label: t("notifications") || "Notifications", href: "/notifications" },
-    { icon: MessageCircle, label: t("messages") || "Messages", href: "/messages" },
+    { icon: Settings, label: t("settings") || "Settings", href: "/profile" },
     { icon: LogOut, label: t("logout") || "Logout", href: "/logout", isAction: true }
   ];
 
@@ -79,7 +77,10 @@ const Header = ({ sidebarOpen, setSidebarOpen, currentLanguage, setCurrentLangua
           <div className="relative">
             <select
               value={currentLanguage}
-              onChange={(e) => setCurrentLanguage(e.target.value)}
+              onChange={(e) => {
+                setCurrentLanguage(e.target.value);
+                i18n.changeLanguage(e.target.value);
+              }}
               className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 cursor-pointer"
             >
               {languages.map(lang => (
