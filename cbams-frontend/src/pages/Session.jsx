@@ -19,7 +19,8 @@ import {
   ExternalLink,
   ShieldCheck,
   ChevronRight,
-  Users
+  Users,
+  Bot
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSelector } from 'react-redux';
