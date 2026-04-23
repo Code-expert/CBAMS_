@@ -1,6 +1,6 @@
 import express from 'express';
-import { 
-  getYieldPrediction, 
+import {
+  getYieldPrediction,
   getPriceForecast,
   detectDisease
 } from '../controllers/mlController.js';

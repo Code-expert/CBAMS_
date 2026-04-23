@@ -28,7 +28,7 @@ router.get('/', async (req, res) => {
                 }
             }
         });
-        
+
         // Format for frontend
         const formattedPosts = posts.map(post => ({
             id: post.id,
@@ -60,7 +60,7 @@ router.get('/', async (req, res) => {
 router.post('/', auth, async (req, res) => {
     try {
         const { content, category, tags, imageUrl } = req.body;
-        
+
         if (!content) {
             return res.status(400).json({ error: 'Post content is required' });
         }
