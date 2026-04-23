@@ -9,6 +9,10 @@ function generateSessionCode() {
 }
 
 export const bookSession = async (req, res) => {
+  console.log('🚀 Booking Request Received:', {
+    body: req.body,
+    user: req.user ? { id: req.user.id, role: req.user.role } : 'No User'
+  });
   try {
     const { expertId, date, time, mode, description } = req.body;
 
@@ -16,6 +20,12 @@ export const bookSession = async (req, res) => {
     if (!expertId || !date) {
       console.log('⚠️ Booking failed: Missing expertId or date', { expertId, date });
       return res.status(400).json({ message: "Expert ID and date are required" });
+    }
+
+    const sessionDate = new Date(date);
+    if (isNaN(sessionDate.getTime())) {
+      console.log('⚠️ Booking failed: Invalid date format', { date });
+      return res.status(400).json({ message: "Invalid date format" });
     }
 
     const expertIdNum = Number(expertId);
