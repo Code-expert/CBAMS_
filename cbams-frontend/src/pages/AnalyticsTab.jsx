@@ -356,7 +356,7 @@ const AnalyticsPage = () => {
                 {crop.geminiInsights.overallAssessment}
               </div>
             </div>
-            {crop.geminiInsights.visualObservations && crop.geminiInsights.visualObservations.length > 0 && (
+            {Array.isArray(crop.geminiInsights.visualObservations) && crop.geminiInsights.visualObservations.length > 0 && (
               <ul className="space-y-2">
                 {crop.geminiInsights.visualObservations.map((observation, index) => (
                   <li key={index} className="flex items-start space-x-3 bg-white p-3 rounded-lg">
@@ -369,7 +369,7 @@ const AnalyticsPage = () => {
           </div>
 
           {/* AI Recommendations */}
-          {crop.geminiInsights.recommendations && crop.geminiInsights.recommendations.length > 0 && (
+          {Array.isArray(crop.geminiInsights.recommendations) && crop.geminiInsights.recommendations.length > 0 && (
             <div className="bg-white rounded-2xl p-6 shadow-lg border border-green-200">
               <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
                 <AlertCircle className="w-6 h-6 mr-2 text-green-600" />

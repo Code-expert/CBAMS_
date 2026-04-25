@@ -136,11 +136,18 @@ Return ONLY the JSON object above. No markdown. Just raw JSON.`;
       analysis.colorAnalysis.browningLevel = Number(analysis.colorAnalysis.browningLevel) || 0;
     }
 
-    if (!analysis.observations || analysis.observations.length === 0) {
+    // Ensure observations and recommendations are arrays
+    if (!Array.isArray(analysis.observations)) {
+      analysis.observations = typeof analysis.observations === 'string' ? [analysis.observations] : ['AI analysis completed', 'Visual assessment done'];
+    }
+    if (analysis.observations.length === 0) {
       analysis.observations = ['AI analysis completed', 'Visual assessment done', 'Crop monitored'];
     }
 
-    if (!analysis.recommendations || analysis.recommendations.length === 0) {
+    if (!Array.isArray(analysis.recommendations)) {
+      analysis.recommendations = typeof analysis.recommendations === 'string' ? [analysis.recommendations] : ['Continue regular care'];
+    }
+    if (analysis.recommendations.length === 0) {
       analysis.recommendations = ['Continue regular care', 'Monitor for changes', 'Upload weekly photos'];
     }
 

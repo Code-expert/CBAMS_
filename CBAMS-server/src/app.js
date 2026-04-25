@@ -20,6 +20,7 @@ import cropRecommendationRoutes from './routes/cropRecommendationRoutes.js';
 import mlRoutes from './routes/mlRoutes.js';
 import chatbotRoutes from './routes/chatbot.js';
 import communityRoutes from './routes/community.js';
+import uploadRoutes from './routes/upload.js';
 
 dotenv.config();
 const app = express();
@@ -58,5 +59,6 @@ app.use('/api/farm-metrics', farmMetricsRoutes);
 app.use('/api/ml', mlRoutes);
 app.use('/api/chatbot', chatbotRoutes);
 app.use('/community', communityRoutes);
+app.use('/upload', uploadRoutes);
 
 export default app;

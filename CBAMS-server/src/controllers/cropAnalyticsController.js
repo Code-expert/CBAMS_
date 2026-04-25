@@ -57,11 +57,18 @@ export const getCropsAnalytics = async (req, res) => {
         })() || { greenness: 0, yellowingLevel: 0, browningLevel: 0 },
         geminiInsights: (() => {
           try {
-            return typeof crop.latestGeminiInsights === 'string' ? JSON.parse(crop.latestGeminiInsights) : crop.latestGeminiInsights;
+            const insights = typeof crop.latestGeminiInsights === 'string' ? JSON.parse(crop.latestGeminiInsights) : crop.latestGeminiInsights;
+            if (!insights) throw new Error('Empty insights');
+            return {
+              overallAssessment: insights.overallAssessment || 'No analysis yet',
+              diseaseRisk: insights.diseaseRisk || 'Unknown',
+              recommendations: Array.isArray(insights.recommendations) ? insights.recommendations : (typeof insights.recommendations === 'string' ? [insights.recommendations] : []),
+              visualObservations: Array.isArray(insights.visualObservations) ? insights.visualObservations : (typeof insights.visualObservations === 'string' ? [insights.visualObservations] : [])
+            };
           } catch (e) {
             return { overallAssessment: 'No analysis yet', diseaseRisk: 'Unknown', recommendations: [], visualObservations: [] };
           }
-        })() || { overallAssessment: 'No analysis yet', diseaseRisk: 'Unknown', recommendations: [], visualObservations: [] }
+        })()
       };
     });
 
@@ -180,11 +187,18 @@ export const getCropDetails = async (req, res) => {
       })),
       geminiInsights: (() => {
         try {
-          return typeof crop.latestGeminiInsights === 'string' ? JSON.parse(crop.latestGeminiInsights) : crop.latestGeminiInsights;
+          const insights = typeof crop.latestGeminiInsights === 'string' ? JSON.parse(crop.latestGeminiInsights) : crop.latestGeminiInsights;
+          if (!insights) throw new Error('Empty insights');
+          return {
+            overallAssessment: insights.overallAssessment || 'No analysis yet',
+            diseaseRisk: insights.diseaseRisk || 'Unknown',
+            recommendations: Array.isArray(insights.recommendations) ? insights.recommendations : (typeof insights.recommendations === 'string' ? [insights.recommendations] : []),
+            visualObservations: Array.isArray(insights.visualObservations) ? insights.visualObservations : (typeof insights.visualObservations === 'string' ? [insights.visualObservations] : [])
+          };
         } catch (e) {
           return { overallAssessment: 'No analysis yet', diseaseRisk: 'Unknown', recommendations: [], visualObservations: [] };
         }
-      })() || { overallAssessment: 'No analysis yet', diseaseRisk: 'Unknown', recommendations: [], visualObservations: [] },
+      })(),
       recentImages: crop.images
     });
   } catch (error) {
