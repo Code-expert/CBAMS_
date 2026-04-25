@@ -25,7 +25,7 @@ dotenv.config();
 const app = express();
 
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5000','https://cbams.vercel.app','https://cbams-1-6v7m.onrender.com'],
+  origin: ['http://localhost:5173', 'http://localhost:5000', 'https://cbams.vercel.app', 'https://cbams-1-6v7m.onrender.com'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -51,10 +51,10 @@ app.use("/orders", orderRoutes);
 app.use("/admin/orders", adminOrderRoutes);
 app.use("/schedules", scheduleRoutes);
 app.use("/session", sessionRoutes);
-app.use('/tasks', taskRoutes); 
+app.use('/tasks', taskRoutes);
 app.use('/api/crop-recommendation', cropRecommendationRoutes);
-app.use('/api/crops', analyticsRoutes); 
-app.use('/api/farm-metrics', farmMetricsRoutes); 
+app.use('/api/crops', analyticsRoutes);
+app.use('/api/farm-metrics', farmMetricsRoutes);
 app.use('/api/ml', mlRoutes);
 app.use('/api/chatbot', chatbotRoutes);
 app.use('/community', communityRoutes);

@@ -7,8 +7,8 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 export const analyzeImageWithGemini = async (imageUrl, imageId, crop) => {
   try {
-    const model = genAI.getGenerativeModel({ 
-      model: 'gemini-2.5-flash-image'
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-2.5-flash'
     });
 
     const prompt = `Analyze this ${crop.type} crop image. You MUST respond with ONLY a valid JSON object, providing expert agricultural insights.
@@ -80,18 +80,18 @@ Return ONLY the JSON object above. No markdown. Just raw JSON.`;
 
     } catch (parseError) {
       console.error('❌ Parse failed. Response was:', responseText);
-      
+
       // Try to extract values manually from text
       const healthMatch = responseText.match(/health.*?(\d+)/i);
       const diseaseMatch = responseText.match(/disease.*?(yes|no|true|false|detected|none)/i);
-      
+
       analysis = {
         healthScore: healthMatch ? parseInt(healthMatch[1]) : 75,
         growthStage: 'Vegetative Growth',
-        diseaseDetected: diseaseMatch ? 
-          (diseaseMatch[1].toLowerCase().includes('yes') || 
-           diseaseMatch[1].toLowerCase().includes('true') || 
-           diseaseMatch[1].toLowerCase().includes('detected')) : false,
+        diseaseDetected: diseaseMatch ?
+          (diseaseMatch[1].toLowerCase().includes('yes') ||
+            diseaseMatch[1].toLowerCase().includes('true') ||
+            diseaseMatch[1].toLowerCase().includes('detected')) : false,
         diseaseName: null,
         diseaseConfidence: null,
         pestActivity: 'Analysis completed',
@@ -115,53 +115,64 @@ Return ONLY the JSON object above. No markdown. Just raw JSON.`;
         diseaseRisk: 'Low',
         overallAssessment: responseText.substring(0, 150) || 'Crop analysis completed'
       };
-      
+
       console.log('⚠️ Using extracted/fallback values');
     }
 
     // Validate and fill missing fields
-    analysis.healthScore = analysis.healthScore || 75;
+    analysis.healthScore = Number(analysis.healthScore) || 75;
     analysis.growthStage = analysis.growthStage || 'Growing';
     analysis.diseaseDetected = analysis.diseaseDetected || false;
     analysis.pestActivity = analysis.pestActivity || 'None detected';
     analysis.leafCondition = analysis.leafCondition || 'Monitoring';
     analysis.heightEstimate = analysis.heightEstimate || 'Normal';
     
-    if (!analysis.colorAnalysis) {
+    // Ensure colorAnalysis is present and contains numbers
+    if (!analysis.colorAnalysis || typeof analysis.colorAnalysis !== 'object') {
       analysis.colorAnalysis = { greenness: 80, yellowingLevel: 10, browningLevel: 10 };
+    } else {
+      analysis.colorAnalysis.greenness = Number(analysis.colorAnalysis.greenness) || 0;
+      analysis.colorAnalysis.yellowingLevel = Number(analysis.colorAnalysis.yellowingLevel) || 0;
+      analysis.colorAnalysis.browningLevel = Number(analysis.colorAnalysis.browningLevel) || 0;
     }
-    
+
     if (!analysis.observations || analysis.observations.length === 0) {
       analysis.observations = ['AI analysis completed', 'Visual assessment done', 'Crop monitored'];
     }
-    
+
     if (!analysis.recommendations || analysis.recommendations.length === 0) {
       analysis.recommendations = ['Continue regular care', 'Monitor for changes', 'Upload weekly photos'];
     }
-    
+
     analysis.diseaseRisk = analysis.diseaseRisk || 'Low';
     analysis.overallAssessment = analysis.overallAssessment || 'Crop monitoring active';
 
-    // Save to database
-    await prisma.cropAnalysisImage.update({
-      where: { id: imageId },
-      data: {
-        healthScore: analysis.healthScore,
-        growthStage: analysis.growthStage,
-        diseaseDetected: analysis.diseaseDetected,
-        diseaseName: analysis.diseaseName,
-        diseaseConfidence: analysis.diseaseConfidence,
-        pestActivity: analysis.pestActivity,
-        leafCondition: analysis.leafCondition,
-        heightEstimate: analysis.heightEstimate,
-        colorAnalysis: JSON.stringify(analysis.colorAnalysis),
-        observations: JSON.stringify(analysis.observations.slice(0, 10)), // Max 10
-        recommendations: JSON.stringify(analysis.recommendations.slice(0, 10)), // Max 10
-        diseaseRisk: analysis.diseaseRisk,
-        overallAssessment: analysis.overallAssessment.substring(0, 500),
-        processingStatus: 'COMPLETED'
+    // Save to database (only if it's a real record ID)
+    if (imageId && !imageId.toString().startsWith('fallback_')) {
+      try {
+        await prisma.cropAnalysisImage.update({
+          where: { id: imageId },
+          data: {
+            healthScore: analysis.healthScore,
+            growthStage: analysis.growthStage,
+            diseaseDetected: analysis.diseaseDetected,
+            diseaseName: analysis.diseaseName,
+            diseaseConfidence: analysis.diseaseConfidence,
+            pestActivity: analysis.pestActivity,
+            leafCondition: analysis.leafCondition,
+            heightEstimate: analysis.heightEstimate,
+            colorAnalysis: JSON.stringify(analysis.colorAnalysis),
+            observations: JSON.stringify(analysis.observations.slice(0, 10)), // Max 10
+            recommendations: JSON.stringify(analysis.recommendations.slice(0, 10)), // Max 10
+            diseaseRisk: analysis.diseaseRisk,
+            overallAssessment: analysis.overallAssessment.substring(0, 500),
+            processingStatus: 'COMPLETED'
+          }
+        });
+      } catch (dbError) {
+        console.warn('⚠️ Could not update cropAnalysisImage record:', dbError.message);
       }
-    });
+    }
 
     // Add to history
     const daysSincePlanting = Math.floor(
@@ -177,7 +188,7 @@ Return ONLY the JSON object above. No markdown. Just raw JSON.`;
         healthScore: analysis.healthScore,
         leafCondition: analysis.leafCondition,
         heightEstimate: analysis.heightEstimate,
-        diseaseStatus: analysis.diseaseDetected ? 
+        diseaseStatus: analysis.diseaseDetected ?
           (analysis.diseaseName || 'Disease detected') : 'None',
         imageId: imageId
       }
@@ -227,31 +238,31 @@ Return ONLY the JSON object above. No markdown. Just raw JSON.`;
       overallAssessment: 'Automated AI analysis is temporarily unavailable. Based on previous trends, the crop appears to be in stable condition.'
     };
 
-    try {
-      // Update database with fallback data
-      await prisma.cropAnalysisImage.update({
-        where: { id: imageId },
-        data: {
-          healthScore: analysis.healthScore,
-          growthStage: analysis.growthStage,
-          diseaseDetected: analysis.diseaseDetected,
-          diseaseName: analysis.diseaseName,
-          diseaseConfidence: analysis.diseaseConfidence,
-          pestActivity: analysis.pestActivity,
-          leafCondition: analysis.leafCondition,
-          heightEstimate: analysis.heightEstimate,
-          colorAnalysis: JSON.stringify(analysis.colorAnalysis),
-          observations: JSON.stringify(analysis.observations),
-          recommendations: JSON.stringify(analysis.recommendations),
-          diseaseRisk: analysis.diseaseRisk,
-          overallAssessment: analysis.overallAssessment,
-          processingStatus: 'COMPLETED' // Mark as completed (with fallback) to avoid infinite loading
-        }
-      });
-      return analysis;
-    } catch (saveError) {
-      console.error('❌ Final fallback save failed:', saveError.message);
-      throw error;
+    // Update database with fallback data (only if it's a real record ID)
+    if (imageId && !imageId.toString().startsWith('fallback_')) {
+      try {
+        await prisma.cropAnalysisImage.update({
+          where: { id: imageId },
+          data: {
+            healthScore: analysis.healthScore,
+            growthStage: analysis.growthStage,
+            diseaseDetected: analysis.diseaseDetected,
+            diseaseName: analysis.diseaseName,
+            diseaseConfidence: analysis.diseaseConfidence,
+            pestActivity: analysis.pestActivity,
+            leafCondition: analysis.leafCondition,
+            heightEstimate: analysis.heightEstimate,
+            colorAnalysis: JSON.stringify(analysis.colorAnalysis),
+            observations: JSON.stringify(analysis.observations),
+            recommendations: JSON.stringify(analysis.recommendations),
+            diseaseRisk: analysis.diseaseRisk,
+            overallAssessment: analysis.overallAssessment,
+            processingStatus: 'COMPLETED' // Mark as completed (with fallback) to avoid infinite loading
+          }
+        });
+      } catch (dbError) {
+        console.warn('⚠️ Could not save fallback data to DB:', dbError.message);
+      }
     }
   }
 };

@@ -48,17 +48,20 @@ export const getCropsAnalytics = async (req, res) => {
         diseaseName: crop.latestDiseaseName,
         diseaseConfidence: crop.latestDiseaseConfidence,
         pestActivity: crop.latestPestActivity || 'None detected',
-        leafColorHealth: crop.latestColorAnalysis || {
-          greenness: 0,
-          yellowingLevel: 0,
-          browningLevel: 0
-        },
-        geminiInsights: crop.latestGeminiInsights || {
-          overallAssessment: 'No analysis yet',
-          diseaseRisk: 'Unknown',
-          recommendations: [],
-          visualObservations: []
-        }
+        leafColorHealth: (() => {
+          try {
+            return typeof crop.latestColorAnalysis === 'string' ? JSON.parse(crop.latestColorAnalysis) : crop.latestColorAnalysis;
+          } catch (e) {
+            return { greenness: 0, yellowingLevel: 0, browningLevel: 0 };
+          }
+        })() || { greenness: 0, yellowingLevel: 0, browningLevel: 0 },
+        geminiInsights: (() => {
+          try {
+            return typeof crop.latestGeminiInsights === 'string' ? JSON.parse(crop.latestGeminiInsights) : crop.latestGeminiInsights;
+          } catch (e) {
+            return { overallAssessment: 'No analysis yet', diseaseRisk: 'Unknown', recommendations: [], visualObservations: [] };
+          }
+        })() || { overallAssessment: 'No analysis yet', diseaseRisk: 'Unknown', recommendations: [], visualObservations: [] }
       };
     });
 
@@ -160,11 +163,13 @@ export const getCropDetails = async (req, res) => {
       diseaseName: crop.latestDiseaseName,
       diseaseConfidence: crop.latestDiseaseConfidence,
       pestActivity: crop.latestPestActivity || 'None detected',
-      leafColorHealth: crop.latestColorAnalysis || {
-        greenness: 0,
-        yellowingLevel: 0,
-        browningLevel: 0
-      },
+      leafColorHealth: (() => {
+        try {
+          return typeof crop.latestColorAnalysis === 'string' ? JSON.parse(crop.latestColorAnalysis) : crop.latestColorAnalysis;
+        } catch (e) {
+          return { greenness: 0, yellowingLevel: 0, browningLevel: 0 };
+        }
+      })() || { greenness: 0, yellowingLevel: 0, browningLevel: 0 },
       growthTimeline: crop.analysisHistory.map(history => ({
         week: history.weekNumber,
         date: history.analyzedAt,
@@ -173,12 +178,13 @@ export const getCropDetails = async (req, res) => {
         heightEstimate: history.heightEstimate,
         diseaseStatus: history.diseaseStatus
       })),
-      geminiInsights: crop.latestGeminiInsights || {
-        overallAssessment: 'No analysis yet',
-        diseaseRisk: 'Unknown',
-        recommendations: [],
-        visualObservations: []
-      },
+      geminiInsights: (() => {
+        try {
+          return typeof crop.latestGeminiInsights === 'string' ? JSON.parse(crop.latestGeminiInsights) : crop.latestGeminiInsights;
+        } catch (e) {
+          return { overallAssessment: 'No analysis yet', diseaseRisk: 'Unknown', recommendations: [], visualObservations: [] };
+        }
+      })() || { overallAssessment: 'No analysis yet', diseaseRisk: 'Unknown', recommendations: [], visualObservations: [] },
       recentImages: crop.images
     });
   } catch (error) {
